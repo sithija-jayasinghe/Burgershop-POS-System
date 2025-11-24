@@ -461,6 +461,7 @@ function openAddProductModal() {
     openModal('product-modal');
 }
 
+
 function openModal(modalId) {
     document.getElementById(modalId).style.display = 'block';
 }
