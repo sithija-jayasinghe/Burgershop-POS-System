@@ -42,7 +42,7 @@ let orders = [
         orderItems: [
             { name: 'French Fries', price: 1050, qty: 1 },
             { name: 'Coca Cola', price: 250, qty: 1 },
-            { name: 'Cheese Burger', price: 1650, qty: 1 } // Math doesn't quite add up to 2450 but it's mock data
+            { name: 'Cheese Burger', price: 1650, qty: 1 }
         ]
     }
 ];
@@ -60,6 +60,9 @@ document.addEventListener('DOMContentLoaded', () => {
     
     document.getElementById('customer-form').addEventListener('submit', handleCustomerSubmit);
     document.getElementById('product-form').addEventListener('submit', handleProductSubmit);
+    
+    // Search Listener
+    document.getElementById('search-product').addEventListener('input', handleSearch);
     
     const overlay = document.createElement('div');
     overlay.className = 'cart-overlay';
@@ -95,12 +98,15 @@ function showSection(sectionId) {
 }
 
 function renderProducts(category) {
+    const filtered = category === 'all' ? products : products.filter(p => p.category === category);
+    renderProductGrid(filtered);
+}
+
+function renderProductGrid(items) {
     const grid = document.getElementById('product-list');
     grid.innerHTML = '';
     
-    const filtered = category === 'all' ? products : products.filter(p => p.category === category);
-    
-    filtered.forEach(product => {
+    items.forEach(product => {
         const card = document.createElement('div');
         card.className = 'product-card';
         card.onclick = () => addToCart(product.id);
@@ -112,6 +118,19 @@ function renderProducts(category) {
         `;
         grid.appendChild(card);
     });
+}
+
+function handleSearch(e) {
+    const searchTerm = e.target.value.toLowerCase();
+    const filtered = products.filter(p => p.name.toLowerCase().includes(searchTerm));
+    renderProductGrid(filtered);
+    
+    if (searchTerm) {
+        document.querySelectorAll('.category-btn').forEach(btn => btn.classList.remove('active'));
+    } else {
+        document.querySelector('.category-btn').classList.add('active');
+        renderProducts('all');
+    }
 }
 
 function filterProducts(category) {
@@ -382,7 +401,7 @@ function renderOrders() {
             <td>LKR ${o.total.toFixed(2)}</td>
             <td>${o.date}</td>
             <td>${o.items}</td>
-            <td><button class="btn-view" onclick="viewOrder(${o.id})">View</button></td>
+            <td><button class="btn-icon" onclick="viewOrder(${o.id})">View</button></td>
         `;
         tbody.appendChild(tr);
     });
@@ -460,7 +479,6 @@ function openAddProductModal() {
     document.getElementById('product-modal-title').innerText = 'Add Product';
     openModal('product-modal');
 }
-
 
 function openModal(modalId) {
     document.getElementById(modalId).style.display = 'block';

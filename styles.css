@@ -630,7 +630,7 @@ th {
         border-top: 1px solid var(--border-color);
         justify-content: space-around;
         z-index: 90;
-        position: relative; /* Ensure it stays at bottom in flex layout */
+        position: relative;
     }
 
     .sidebar .logo, .sidebar .logout {
@@ -663,7 +663,7 @@ th {
     .main-content {
         flex: 1;
         padding: 15px;
-        padding-bottom: 80px; /* Space for floating button */
+        padding-bottom: 80px;
     }
 
     /* Header */
@@ -695,7 +695,7 @@ th {
     }
     
     .mobile-cart-toggle {
-        bottom: 90px; /* Move up above bottom nav */
+        bottom: 90px;
     }
     
     /* Modal adjustments */
