@@ -514,3 +514,190 @@ th {
     background: var(--border-color);
     border-radius: 3px;
 }
+
+/* Mobile Cart Toggle Button (Default Hidden) */
+.mobile-cart-toggle {
+    display: none;
+}
+
+/* Responsive Design */
+@media screen and (max-width: 1024px) {
+    .container {
+        grid-template-columns: 80px 1fr;
+        position: relative;
+    }
+    
+    .cart-sidebar {
+        position: fixed;
+        right: -400px;
+        top: 0;
+        height: 100vh;
+        width: 350px;
+        z-index: 100;
+        transition: right 0.3s ease;
+        box-shadow: -5px 0 15px rgba(0,0,0,0.5);
+    }
+    
+    .cart-sidebar.open {
+        right: 0;
+    }
+
+    /* Overlay when cart is open */
+    .cart-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.5);
+        z-index: 99;
+    }
+    
+    .cart-overlay.open {
+        display: block;
+    }
+    
+    .mobile-cart-toggle {
+        display: flex;
+        position: fixed;
+        bottom: 30px;
+        right: 30px;
+        background-color: var(--accent-color);
+        color: white;
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        justify-content: center;
+        align-items: center;
+        font-size: 24px;
+        border: none;
+        box-shadow: 0 4px 12px rgba(234, 124, 105, 0.4);
+        z-index: 95;
+        cursor: pointer;
+    }
+
+    #cart-count-badge {
+        position: absolute;
+        top: 0;
+        right: 0;
+        background-color: white;
+        color: var(--accent-color);
+        font-size: 12px;
+        font-weight: bold;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        border: 2px solid var(--accent-color);
+    }
+}
+
+@media screen and (max-width: 768px) {
+    .container {
+        display: flex;
+        flex-direction: column-reverse;
+        height: 100vh;
+    }
+
+    /* Bottom Navigation */
+    .sidebar {
+        flex-direction: row;
+        width: 100%;
+        height: 70px;
+        padding: 0;
+        border-right: none;
+        border-top: 1px solid var(--border-color);
+        justify-content: space-around;
+        z-index: 90;
+        position: relative; /* Ensure it stays at bottom in flex layout */
+    }
+
+    .sidebar .logo, .sidebar .logout {
+        display: none;
+    }
+
+    .sidebar nav ul {
+        flex-direction: row;
+        gap: 0;
+        width: 100%;
+        justify-content: space-around;
+    }
+
+    .sidebar nav li {
+        width: auto;
+        height: auto;
+        padding: 10px;
+    }
+    
+    .sidebar nav li.active {
+        background-color: transparent;
+    }
+
+    .sidebar nav li.active a {
+        box-shadow: none;
+        transform: translateY(-5px);
+    }
+
+    /* Main Content */
+    .main-content {
+        flex: 1;
+        padding: 15px;
+        padding-bottom: 80px; /* Space for floating button */
+    }
+
+    /* Header */
+    header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+    }
+
+    .search-bar {
+        width: 100%;
+    }
+
+    /* Categories */
+    .categories {
+        overflow-x: auto;
+        padding-bottom: 5px;
+        white-space: nowrap;
+    }
+    
+    .category-btn {
+        margin-right: 15px;
+    }
+
+    /* Cart Sidebar Mobile Full Width */
+    .cart-sidebar {
+        width: 100%;
+        right: -100%;
+    }
+    
+    .mobile-cart-toggle {
+        bottom: 90px; /* Move up above bottom nav */
+    }
+    
+    /* Modal adjustments */
+    .modal-content {
+        width: 90%;
+        margin: 20% auto;
+    }
+    
+    .product-grid {
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: 15px;
+    }
+    
+    .product-card {
+        padding: 15px;
+    }
+    
+    .product-card img {
+        width: 100px;
+        height: 100px;
+        margin-top: -40px;
+    }
+}

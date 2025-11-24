@@ -32,7 +32,25 @@ document.addEventListener('DOMContentLoaded', () => {
     // Form Submissions
     document.getElementById('customer-form').addEventListener('submit', handleCustomerSubmit);
     document.getElementById('product-form').addEventListener('submit', handleProductSubmit);
+    
+    // Add overlay for mobile cart
+    const overlay = document.createElement('div');
+    overlay.className = 'cart-overlay';
+    overlay.onclick = toggleCart;
+    document.body.appendChild(overlay);
 });
+
+function toggleCart() {
+    const cartSidebar = document.querySelector('.cart-sidebar');
+    const overlay = document.querySelector('.cart-overlay');
+    cartSidebar.classList.toggle('open');
+    overlay.classList.toggle('open');
+}
+
+function updateCartBadge() {
+    const count = cart.reduce((sum, item) => sum + item.qty, 0);
+    document.getElementById('cart-count-badge').innerText = count;
+}
 
 function updateCurrentDate() {
     const dateElement = document.getElementById('current-date');
@@ -91,6 +109,7 @@ function addToCart(productId) {
         cart.push({ ...product, qty: 1 });
     }
     renderCart();
+    updateCartBadge(); // Update badge when adding
 }
 
 function renderCart() {
@@ -123,6 +142,7 @@ function renderCart() {
     });
     
     document.getElementById('cart-total').innerText = `LKR ${total.toFixed(2)}`;
+    updateCartBadge(); // Update badge when rendering
 }
 
 function updateCartQty(productId, change) {
@@ -174,8 +194,14 @@ function processPayment() {
     alert(`Payment Successful! Order #${currentOrderId} placed.`);
     cart = [];
     renderCart();
+    updateCartBadge(); // Update badge after payment
     currentOrderId++;
     updateOrderId();
+    
+    // Close cart on mobile after payment
+    if (window.innerWidth <= 1024) {
+        toggleCart();
+    }
 }
 
 function updateOrderId() {
