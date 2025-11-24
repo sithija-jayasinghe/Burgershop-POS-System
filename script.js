@@ -3,8 +3,17 @@ let products = [
     { id: 2, name: 'SAustralian Burger', price: 1750, category: 'Burger', image: 'https://cdn.tasteatlas.com/images/dishes/d867d86275fe45b2af4a33c11d09b916.jpg?w=600', stock: 11 },
     { id: 3, name: 'Jucy Lucy Burger', price: 1850, category: 'Burger', image: 'https://sundaysuppermovement.com/wp-content/uploads/2024/08/juicy-lucy-burger-featured.jpg', stock: 16 },
     { id: 4, name: 'Green Chille Burger', price: 1950, category: 'Burger', image: 'https://arcticzone.com/cdn/shop/articles/sgc-smash-burger.webp?v=1727442331', stock: 22 },
-    { id: 5, name: 'French Fries', price: 1050, category: 'Fries', image: 'https://images.unsplash.com/photo-1630384060421-cb20d0e0649d?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=60', stock: 50 },
-    { id: 6, name: 'Coca Cola', price: 250, category: 'Drink', image: 'https://images.unsplash.com/photo-1622483767028-3f66f32aef97?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=60', stock: 100 }
+    { id: 5, name: 'nutburger', price: 1650, category: 'Burger', image: 'https://www.veganricha.com/wp-content/uploads/2016/03/vegan-lentil-walnut-burgers-2912.jpg', stock: 22 },
+    { id: 6, name: 'Turkey Burger', price: 1700, category: 'Burger', image: 'https://shadybrookfarms.com/wp-content/uploads/2020/09/HSW_Recipe_Square_0006_CaliforniaTurkeyBurger-768x768.jpg', stock: 20 },
+    { id: 7, name: 'French Fries', price: 1050, category: 'Fries', image: 'https://images.unsplash.com/photo-1630384060421-cb20d0e0649d?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=60', stock: 50 },
+    { id: 8, name: 'Waffle Fries', price: 1050, category: 'Fries', image: 'https://sundaytable.co/wp-content/uploads/2024/02/the-best-cheese-fries-1.jpg', stock: 50 },
+    { id: 8, name: 'Cheese Fries', price: 1050, category: 'Fries', image: 'https://www.emborg.com/app/uploads/2023/07/1200x900px_French_Fries_Overload.png', stock: 50 },
+    { id: 9, name: 'Curley Fries', price: 1050, category: 'Fries', image: 'https://media.istockphoto.com/id/483530333/photo/spicy-seasoned-curly-fries.jpg?s=612x612&w=0&k=20&c=dKJRWettRAnzg6BVfTDKzfd5AM66F9gRqIr_njGiF8E=', stock: 50 },
+    { id: 10, name: 'Coca Cola', price: 250, category: 'Drink', image: 'https://images.unsplash.com/photo-1622483767028-3f66f32aef97?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=60', stock: 100 },
+    { id: 11, name: 'Sprite', price: 250, category: 'Drink', image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQuwfyPonH0cPvqO_SELhyYHAZUmRYluj5n2w&s', stock: 100 },
+    { id: 12, name: 'Fanta', price: 250, category: 'Drink', image: 'https://marketing-interactive-assets.b-cdn.net/images/sg/content-images/tiktok/fanta_old_logo_refresh.jpg', stock: 100 },
+    { id: 13, name: 'Virgin Mojito', price: 250, category: 'Drink', image: 'https://fullofplants.com/wp-content/uploads/2021/05/easy-virgin-mojito-alcohol-free-kid-friendly-refreshing-drink-thumb.jpg', stock: 100 },
+    { id: 14, name: 'Passion Mojito', price: 250, category: 'Drink', image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSTrtrf_6SsG-r2Pts8_XQ7fAN5z-TW2Natmw&s', stock: 100 },
 ];
 
 let customers = [
