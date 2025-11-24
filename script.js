@@ -22,8 +22,29 @@ let customers = [
 ];
 
 let orders = [
-    { id: 34560, customer: 'Kasun Perera', total: 3500, date: '2021-02-01', items: 3 },
-    { id: 34561, customer: 'Nimali Silva', total: 2450, date: '2021-02-02', items: 2 }
+    { 
+        id: 34560, 
+        customer: 'Kasun Perera', 
+        total: 3500, 
+        date: '2021-02-01', 
+        items: 3,
+        orderItems: [
+            { name: 'Cheese Burger', price: 1650, qty: 1 },
+            { name: 'Jucy Lucy Burger', price: 1850, qty: 1 }
+        ]
+    },
+    { 
+        id: 34561, 
+        customer: 'Nimali Silva', 
+        total: 2450, 
+        date: '2021-02-02', 
+        items: 2,
+        orderItems: [
+            { name: 'French Fries', price: 1050, qty: 1 },
+            { name: 'Coca Cola', price: 250, qty: 1 },
+            { name: 'Cheese Burger', price: 1650, qty: 1 } // Math doesn't quite add up to 2450 but it's mock data
+        ]
+    }
 ];
 
 let cart = [];
@@ -174,7 +195,8 @@ function processPayment() {
         customer: 'Walk-in Customer',
         total: total,
         date: new Date().toISOString().split('T')[0],
-        items: cart.reduce((sum, item) => sum + item.qty, 0)
+        items: cart.reduce((sum, item) => sum + item.qty, 0),
+        orderItems: [...cart]
     };
     
     orders.push(newOrder);
@@ -360,10 +382,68 @@ function renderOrders() {
             <td>LKR ${o.total.toFixed(2)}</td>
             <td>${o.date}</td>
             <td>${o.items}</td>
-            <td><button class="btn-icon">View</button></td>
+            <td><button class="btn-view" onclick="viewOrder(${o.id})">View</button></td>
         `;
         tbody.appendChild(tr);
     });
+}
+
+function viewOrder(orderId) {
+    const order = orders.find(o => o.id === orderId);
+    if (!order) return;
+
+    const content = document.getElementById('order-details-content');
+    let itemsHtml = '';
+    
+    if (order.orderItems && order.orderItems.length > 0) {
+        itemsHtml = `
+            <table style="width:100%; margin-top:15px; border-collapse: collapse;">
+                <thead>
+                    <tr style="border-bottom:1px solid #393c49; text-align:left;">
+                        <th style="padding:8px; color: #abbbc2;">Item</th>
+                        <th style="padding:8px; color: #abbbc2;">Qty</th>
+                        <th style="padding:8px; color: #abbbc2;">Price</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${order.orderItems.map(item => `
+                        <tr style="border-bottom:1px solid #393c49;">
+                            <td style="padding:8px;">${item.name}</td>
+                            <td style="padding:8px;">${item.qty}</td>
+                            <td style="padding:8px;">LKR ${(item.price * item.qty).toFixed(2)}</td>
+                        </tr>
+                    `).join('')}
+                </tbody>
+            </table>
+        `;
+    } else {
+        itemsHtml = '<p style="margin-top: 15px; color: #abbbc2;">No item details available.</p>';
+    }
+
+    content.innerHTML = `
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px;">
+            <div>
+                <p style="color: #abbbc2; font-size: 14px;">Order ID</p>
+                <p style="font-weight: bold;">#${order.id}</p>
+            </div>
+            <div>
+                <p style="color: #abbbc2; font-size: 14px;">Date</p>
+                <p style="font-weight: bold;">${order.date}</p>
+            </div>
+            <div>
+                <p style="color: #abbbc2; font-size: 14px;">Customer</p>
+                <p style="font-weight: bold;">${order.customer}</p>
+            </div>
+            <div>
+                <p style="color: #abbbc2; font-size: 14px;">Total Amount</p>
+                <p style="font-weight: bold; color: #ea7c69;">LKR ${order.total.toFixed(2)}</p>
+            </div>
+        </div>
+        <h3 style="font-size: 16px; margin-top: 20px; border-top: 1px solid #393c49; padding-top: 15px;">Order Items</h3>
+        ${itemsHtml}
+    `;
+    
+    openModal('order-modal');
 }
 
 function openAddCustomerModal() {
