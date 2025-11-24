@@ -20,7 +20,6 @@ let orders = [
 let cart = [];
 let currentOrderId = 34562;
 
-// Initialization
 document.addEventListener('DOMContentLoaded', () => {
     renderProducts('all');
     renderCustomers();
@@ -29,11 +28,9 @@ document.addEventListener('DOMContentLoaded', () => {
     updateOrderId();
     updateCurrentDate();
     
-    // Form Submissions
     document.getElementById('customer-form').addEventListener('submit', handleCustomerSubmit);
     document.getElementById('product-form').addEventListener('submit', handleProductSubmit);
     
-    // Add overlay for mobile cart
     const overlay = document.createElement('div');
     overlay.className = 'cart-overlay';
     overlay.onclick = toggleCart;
@@ -59,19 +56,14 @@ function updateCurrentDate() {
     dateElement.innerText = now.toLocaleDateString('en-US', options);
 }
 
-// Navigation
 function showSection(sectionId) {
-    // Hide all sections
     document.querySelectorAll('.section').forEach(sec => sec.classList.remove('active'));
-    // Show target section
     document.getElementById(`${sectionId}-section`).classList.add('active');
     
-    // Update sidebar active state
     document.querySelectorAll('.sidebar nav li').forEach(li => li.classList.remove('active'));
     event.currentTarget.classList.add('active');
 }
 
-// POS Logic
 function renderProducts(category) {
     const grid = document.getElementById('product-list');
     grid.innerHTML = '';
@@ -98,7 +90,6 @@ function filterProducts(category) {
     renderProducts(category);
 }
 
-// Cart Logic
 function addToCart(productId) {
     const product = products.find(p => p.id === productId);
     const existingItem = cart.find(item => item.id === productId);
@@ -109,7 +100,7 @@ function addToCart(productId) {
         cart.push({ ...product, qty: 1 });
     }
     renderCart();
-    updateCartBadge(); // Update badge when adding
+    updateCartBadge();
 }
 
 function renderCart() {
@@ -142,7 +133,7 @@ function renderCart() {
     });
     
     document.getElementById('cart-total').innerText = `LKR ${total.toFixed(2)}`;
-    updateCartBadge(); // Update badge when rendering
+    updateCartBadge();
 }
 
 function updateCartQty(productId, change) {
@@ -179,7 +170,6 @@ function processPayment() {
     
     orders.push(newOrder);
     
-    // Update stock
     cart.forEach(cartItem => {
         const product = products.find(p => p.id === cartItem.id);
         if (product) {
@@ -194,11 +184,10 @@ function processPayment() {
     alert(`Payment Successful! Order #${currentOrderId} placed.`);
     cart = [];
     renderCart();
-    updateCartBadge(); // Update badge after payment
+    updateCartBadge();
     currentOrderId++;
     updateOrderId();
     
-    // Close cart on mobile after payment
     if (window.innerWidth <= 1024) {
         toggleCart();
     }
@@ -208,7 +197,6 @@ function updateOrderId() {
     document.getElementById('order-id-display').innerText = currentOrderId;
 }
 
-// Customer CRUD
 function renderCustomers() {
     const tbody = document.querySelector('#customer-table tbody');
     tbody.innerHTML = '';
@@ -248,13 +236,11 @@ function handleCustomerSubmit(e) {
     const email = document.getElementById('customer-email').value;
     
     if (id) {
-        // Update
         const index = customers.findIndex(c => c.id == id);
         if (index !== -1) {
             customers[index] = { id: parseInt(id), name, phone, email };
         }
     } else {
-        // Create
         const newCustomer = {
             id: customers.length > 0 ? Math.max(...customers.map(c => c.id)) + 1 : 1,
             name,
@@ -278,7 +264,6 @@ function deleteCustomer(id) {
     }
 }
 
-// Product CRUD
 function renderProductsTable() {
     const tbody = document.querySelector('#product-table tbody');
     tbody.innerHTML = '';
@@ -323,13 +308,11 @@ function handleProductSubmit(e) {
     const image = document.getElementById('product-image').value || 'https://via.placeholder.com/150';
     
     if (id) {
-        // Update
         const index = products.findIndex(p => p.id == id);
         if (index !== -1) {
             products[index] = { ...products[index], name, category, price, stock, image };
         }
     } else {
-        // Create
         const newProduct = {
             id: products.length > 0 ? Math.max(...products.map(p => p.id)) + 1 : 1,
             name,
@@ -357,7 +340,6 @@ function deleteProduct(id) {
     }
 }
 
-// Order History
 function renderOrders() {
     const tbody = document.querySelector('#order-table tbody');
     tbody.innerHTML = '';
@@ -375,7 +357,6 @@ function renderOrders() {
     });
 }
 
-// Modal Helpers
 function openAddCustomerModal() {
     document.getElementById('customer-form').reset();
     document.getElementById('customer-id').value = '';
@@ -386,7 +367,7 @@ function openAddCustomerModal() {
 function openAddProductModal() {
     document.getElementById('product-form').reset();
     document.getElementById('product-id').value = '';
-    document.getElementById('product-stock').value = '20'; // Default
+    document.getElementById('product-stock').value = '20';
     document.getElementById('product-modal-title').innerText = 'Add Product';
     openModal('product-modal');
 }
@@ -399,7 +380,6 @@ function closeModal(modalId) {
     document.getElementById(modalId).style.display = 'none';
 }
 
-// Close modal when clicking outside
 window.onclick = function(event) {
     if (event.target.classList.contains('modal')) {
         event.target.style.display = 'none';
