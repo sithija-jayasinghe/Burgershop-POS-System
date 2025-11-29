@@ -207,7 +207,6 @@ function renderRecentOrders() {
     tbody.innerHTML = '';
 
     // Sort orders by ID descending (assuming higher ID = newer)
-    // Create a copy to avoid mutating original array
     let sortedOrders = [...orders].sort((a, b) => b.id - a.id);
     
     // Take top 5
@@ -216,11 +215,10 @@ function renderRecentOrders() {
     for(let i=0; i<recent.length; i++) {
         let o = recent[i];
         let tr = document.createElement('tr');
-        tr.style.borderBottom = '1px solid #393c49';
         tr.innerHTML = `
-            <td style="padding: 12px 10px; color: #fff;">#${o.id}</td>
-            <td style="padding: 12px 10px; color: #abbbc2;">${o.customer}</td>
-            <td style="padding: 12px 10px; color: #fff;">LKR ${o.total.toFixed(2)}</td>
+            <td>#${o.id}</td>
+            <td>${o.customer}</td>
+            <td>LKR ${o.total.toFixed(2)}</td>
         `;
         tbody.appendChild(tr);
     }
@@ -232,7 +230,7 @@ function renderTopProducts() {
     container.innerHTML = '';
 
     // Calculate sales per product
-    let salesMap = {}; // { "Cheese Burger": 5, "Coke": 10 }
+    let salesMap = {}; 
     
     for(let i=0; i<orders.length; i++) {
         let o = orders[i];
@@ -270,14 +268,12 @@ function renderTopProducts() {
         }
 
         let div = document.createElement('div');
-        div.style.display = 'flex';
-        div.style.alignItems = 'center';
-        div.style.gap = '15px';
+        div.className = 'top-item';
         div.innerHTML = `
-            <img src="${img}" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;">
-            <div style="flex: 1;">
-                <h4 style="margin: 0; font-size: 14px; color: #fff;">${item.name}</h4>
-                <p style="margin: 2px 0 0; font-size: 12px; color: #abbbc2;">${item.qty} Sold</p>
+            <img src="${img}" alt="${item.name}">
+            <div class="top-item-info">
+                <h4>${item.name}</h4>
+                <p>${item.qty} Sold</p>
             </div>
         `;
         container.appendChild(div);
@@ -309,17 +305,15 @@ function renderLowStock() {
     for(let i=0; i<displayItems.length; i++) {
         let p = displayItems[i];
         let div = document.createElement('div');
-        div.style.display = 'flex';
-        div.style.justifyContent = 'space-between';
-        div.style.alignItems = 'center';
-        div.style.padding = '8px 0';
-        div.style.borderBottom = '1px solid #393c49';
+        div.className = 'stock-item';
         
-        let color = p.stock === 0 ? '#ff7ca3' : '#ffb572'; // Red if 0, Orange if low
+        let badgeClass = p.stock === 0 ? 'critical' : 'low';
         
         div.innerHTML = `
-            <span style="color: #abbbc2; font-size: 14px;">${p.name}</span>
-            <span style="color: ${color}; font-weight: bold; font-size: 14px;">${p.stock} left</span>
+            <div class="stock-info">
+                <h4>${p.name}</h4>
+            </div>
+            <div class="stock-badge ${badgeClass}">${p.stock} left</div>
         `;
         container.appendChild(div);
     }

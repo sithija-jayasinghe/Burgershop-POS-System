@@ -50,38 +50,44 @@
                     <h1>Dashboard</h1>
                     <p id="dashboard-date">Overview</p>
                 </header>
-                <div class="dashboard-stats" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-top: 20px;">
-                    <div class="stat-card" style="background: #1f1d2b; padding: 20px; border-radius: 8px; text-align: center;">
-                        <i class="fa-solid fa-coins" style="font-size: 24px; color: #ea7c69; margin-bottom: 10px;"></i>
-                        <h3 style="margin: 0; color: #abbbc2; font-size: 14px;">Total Revenue</h3>
-                        <p id="stat-revenue" style="font-size: 24px; font-weight: bold; margin: 10px 0 0;">LKR 0</p>
+                <div class="dashboard-stats">
+                    <div class="stat-card">
+                        <div class="stat-icon revenue">
+                            <i class="fa-solid fa-coins"></i>
+                        </div>
+                        <h3 class="stat-label">Total Revenue</h3>
+                        <p id="stat-revenue" class="stat-value">LKR 0</p>
                     </div>
-                    <div class="stat-card" style="background: #1f1d2b; padding: 20px; border-radius: 8px; text-align: center;">
-                        <i class="fa-solid fa-clipboard-check" style="font-size: 24px; color: #ea7c69; margin-bottom: 10px;"></i>
-                        <h3 style="margin: 0; color: #abbbc2; font-size: 14px;">Total Orders</h3>
-                        <p id="stat-orders" style="font-size: 24px; font-weight: bold; margin: 10px 0 0;">0</p>
+                    <div class="stat-card">
+                        <div class="stat-icon orders">
+                            <i class="fa-solid fa-clipboard-check"></i>
+                        </div>
+                        <h3 class="stat-label">Total Orders</h3>
+                        <p id="stat-orders" class="stat-value">0</p>
                     </div>
-                    <div class="stat-card" style="background: #1f1d2b; padding: 20px; border-radius: 8px; text-align: center;">
-                        <i class="fa-solid fa-users" style="font-size: 24px; color: #ea7c69; margin-bottom: 10px;"></i>
-                        <h3 style="margin: 0; color: #abbbc2; font-size: 14px;">Total Customers</h3>
-                        <p id="stat-customers" style="font-size: 24px; font-weight: bold; margin: 10px 0 0;">0</p>
+                    <div class="stat-card">
+                        <div class="stat-icon customers">
+                            <i class="fa-solid fa-users"></i>
+                        </div>
+                        <h3 class="stat-label">Total Customers</h3>
+                        <p id="stat-customers" class="stat-value">0</p>
                     </div>
                 </div>
 
                 <!-- Extended Dashboard Content -->
-                <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 20px; margin-top: 20px;">
+                <div class="dashboard-grid">
                     <!-- Recent Orders -->
-                    <div style="background: #1f1d2b; padding: 20px; border-radius: 8px;">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                            <h3 style="margin: 0; color: #fff; font-size: 18px;">Recent Orders</h3>
-                            <a href="orders.html" style="color: #ea7c69; text-decoration: none; font-size: 14px;">View All</a>
+                    <div class="dashboard-card">
+                        <div class="card-header">
+                            <h3>Recent Orders</h3>
+                            <a href="orders.html">View All</a>
                         </div>
-                        <table style="width: 100%; border-collapse: collapse;">
+                        <table class="table-modern">
                             <thead>
-                                <tr style="text-align: left; color: #abbbc2; border-bottom: 1px solid #393c49;">
-                                    <th style="padding: 10px;">ID</th>
-                                    <th style="padding: 10px;">Customer</th>
-                                    <th style="padding: 10px;">Amount</th>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Customer</th>
+                                    <th>Amount</th>
                                 </tr>
                             </thead>
                             <tbody id="recent-orders-table">
@@ -91,19 +97,23 @@
                     </div>
 
                     <!-- Right Column -->
-                    <div style="display: flex; flex-direction: column; gap: 20px;">
+                    <div style="display: flex; flex-direction: column; gap: 24px;">
                         <!-- Top Selling -->
-                        <div style="background: #1f1d2b; padding: 20px; border-radius: 8px;">
-                            <h3 style="margin: 0 0 15px 0; color: #fff; font-size: 18px;">Top Selling Items</h3>
-                            <div id="top-products-list" style="display: flex; flex-direction: column; gap: 15px;">
+                        <div class="dashboard-card">
+                            <div class="card-header">
+                                <h3>Top Selling Items</h3>
+                            </div>
+                            <div id="top-products-list">
                                 <!-- Populated by JS -->
                             </div>
                         </div>
 
                         <!-- Low Stock -->
-                        <div style="background: #1f1d2b; padding: 20px; border-radius: 8px;">
-                            <h3 style="margin: 0 0 15px 0; color: #fff; font-size: 18px;">Low Stock Alert</h3>
-                            <div id="low-stock-list" style="display: flex; flex-direction: column; gap: 10px;">
+                        <div class="dashboard-card">
+                            <div class="card-header">
+                                <h3>Low Stock Alert</h3>
+                            </div>
+                            <div id="low-stock-list">
                                 <!-- Populated by JS -->
                             </div>
                         </div>
