@@ -327,6 +327,47 @@ function renderLowStock() {
 // 3.1 Login & User Logic
 // ==========================================
 
+function getFirstAllowedPage(user) {
+    if (!user || !user.permissions || user.permissions.length === 0) return 'index.html';
+    
+    // Order of preference
+    const pageMap = {
+        'home': 'dashboard.html',
+        'pos': 'pos.html',
+        'customers': 'customers.html',
+        'products': 'products.html',
+        'orders': 'orders.html',
+        'users': 'users.html'
+    };
+
+    // Check permissions in order
+    for (let perm of user.permissions) {
+        if (pageMap[perm]) {
+            return pageMap[perm];
+        }
+    }
+    
+    return 'index.html'; // Fallback
+}
+
+function hasPermissionForPage(user, page) {
+    if (!user) return false;
+    
+    const pagePermissionMap = {
+        'dashboard.html': 'home',
+        'pos.html': 'pos',
+        'customers.html': 'customers',
+        'products.html': 'products',
+        'orders.html': 'orders',
+        'users.html': 'users'
+    };
+
+    const requiredPerm = pagePermissionMap[page];
+    if (!requiredPerm) return true; // Public page or unknown
+    
+    return user.permissions.includes(requiredPerm);
+}
+
 function checkLogin() {
     let path = window.location.pathname;
     let page = path.split("/").pop();
@@ -334,14 +375,20 @@ function checkLogin() {
     // If we are on index.html (Login page)
     if (page === 'index.html' || page === '') {
         if (currentUser) {
-            window.location.href = 'dashboard.html';
+            window.location.href = getFirstAllowedPage(currentUser);
         }
     } else {
         // If we are on any other page
         if (!currentUser) {
             window.location.href = 'index.html';
         } else {
-            updateNavigation();
+            // Check if user has permission for this page
+            if (!hasPermissionForPage(currentUser, page)) {
+                alert("Access Denied: You do not have permission to view this page.");
+                window.location.href = getFirstAllowedPage(currentUser);
+            } else {
+                updateNavigation();
+            }
         }
     }
 }
@@ -362,7 +409,7 @@ function handleLogin(e) {
     if(foundUser) {
         currentUser = foundUser;
         saveData(); // Save user to localStorage
-        window.location.href = 'dashboard.html';
+        window.location.href = getFirstAllowedPage(currentUser);
     } else {
         alert('Invalid Username or Password');
     }
