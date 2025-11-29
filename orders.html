@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GrillMaster POS - Orders</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="logo">
+                <i class="fa-solid fa-burger"></i>
+            </div>
+            <nav>
+                <ul>
+                    <li id="nav-home">
+                        <a href="dashboard.html"><i class="fa-solid fa-chart-pie"></i></a>
+                    </li>
+                    <li id="nav-pos">
+                        <a href="pos.html"><i class="fa-solid fa-house"></i></a>
+                    </li>
+                    <li id="nav-customers">
+                        <a href="customers.html"><i class="fa-solid fa-users"></i></a>
+                    </li>
+                    <li id="nav-products">
+                        <a href="products.html"><i class="fa-solid fa-box-open"></i></a>
+                    </li>
+                    <li class="active" id="nav-orders">
+                        <a href="orders.html"><i class="fa-solid fa-clipboard-list"></i></a>
+                    </li>
+                    <li id="nav-users" style="display: none;">
+                        <a href="users.html"><i class="fa-solid fa-user-shield"></i></a>
+                    </li>
+                </ul>
+            </nav>
+            <div class="logout" onclick="logout()">
+                <a href="#"><i class="fa-solid fa-right-from-bracket"></i></a>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Orders Management Section -->
+            <section id="orders-section" class="section active" style="display: block;">
+                <header>
+                    <h1>Order History</h1>
+                </header>
+                <div class="table-container">
+                    <table id="order-table">
+                        <thead>
+                            <tr>
+                                <th>Order ID</th>
+                                <th>Customer</th>
+                                <th>Total</th>
+                                <th>Date</th>
+                                <th>Items</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Order Details Modal -->
+    <div id="order-modal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('order-modal')">&times;</span>
+            <h2>Order Details</h2>
+            <div id="order-details-content">
+                <!-- Details will be populated by JS -->
+            </div>
+            <button class="btn-primary" style="width: 100%; margin-top: 20px;" onclick="printOrder()">Print Receipt</button>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

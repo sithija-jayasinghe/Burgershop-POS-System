@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GrillMaster POS - Users</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="logo">
+                <i class="fa-solid fa-burger"></i>
+            </div>
+            <nav>
+                <ul>
+                    <li id="nav-home">
+                        <a href="dashboard.html"><i class="fa-solid fa-chart-pie"></i></a>
+                    </li>
+                    <li id="nav-pos">
+                        <a href="pos.html"><i class="fa-solid fa-house"></i></a>
+                    </li>
+                    <li id="nav-customers">
+                        <a href="customers.html"><i class="fa-solid fa-users"></i></a>
+                    </li>
+                    <li id="nav-products">
+                        <a href="products.html"><i class="fa-solid fa-box-open"></i></a>
+                    </li>
+                    <li id="nav-orders">
+                        <a href="orders.html"><i class="fa-solid fa-clipboard-list"></i></a>
+                    </li>
+                    <li class="active" id="nav-users" style="display: none;">
+                        <a href="users.html"><i class="fa-solid fa-user-shield"></i></a>
+                    </li>
+                </ul>
+            </nav>
+            <div class="logout" onclick="logout()">
+                <a href="#"><i class="fa-solid fa-right-from-bracket"></i></a>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- User Management Section -->
+            <section id="users-section" class="section active" style="display: block;">
+                <header>
+                    <h1>User Management</h1>
+                    <button class="btn-primary" onclick="openAddUserModal()"><i class="fa-solid fa-plus"></i> Add User</button>
+                </header>
+                <div class="table-container">
+                    <table id="user-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Username</th>
+                                <th>Role</th>
+                                <th>Permissions</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- User Modal -->
+    <div id="user-modal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('user-modal')">&times;</span>
+            <h2 id="user-modal-title">Add User</h2>
+            <form id="user-form">
+                <input type="hidden" id="user-id">
+                <div class="form-group">
+                    <label>Username</label>
+                    <input type="text" id="user-username" required>
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="user-password" required>
+                </div>
+                <div class="form-group">
+                    <label>Role</label>
+                    <select id="user-role" required style="width: 100%; background: #2d303e; border: 1px solid #393c49; color: #fff; padding: 10px; border-radius: 8px;">
+                        <option value="Admin">Admin</option>
+                        <option value="Cashier">Cashier</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Permissions</label>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px;">
+                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                            <input type="checkbox" name="permissions" value="pos"> POS
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                            <input type="checkbox" name="permissions" value="customers"> Customers
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                            <input type="checkbox" name="permissions" value="products"> Products
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                            <input type="checkbox" name="permissions" value="orders"> Orders
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                            <input type="checkbox" name="permissions" value="home"> Dashboard
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                            <input type="checkbox" name="permissions" value="users"> Users
+                        </label>
+                    </div>
+                </div>
+                <button type="submit" class="btn-primary">Save User</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

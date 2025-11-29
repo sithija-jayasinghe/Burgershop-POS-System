@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GrillMaster POS - Point of Sale</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="logo">
+                <i class="fa-solid fa-burger"></i>
+            </div>
+            <nav>
+                <ul>
+                    <li id="nav-home">
+                        <a href="dashboard.html"><i class="fa-solid fa-chart-pie"></i></a>
+                    </li>
+                    <li class="active" id="nav-pos">
+                        <a href="pos.html"><i class="fa-solid fa-house"></i></a>
+                    </li>
+                    <li id="nav-customers">
+                        <a href="customers.html"><i class="fa-solid fa-users"></i></a>
+                    </li>
+                    <li id="nav-products">
+                        <a href="products.html"><i class="fa-solid fa-box-open"></i></a>
+                    </li>
+                    <li id="nav-orders">
+                        <a href="orders.html"><i class="fa-solid fa-clipboard-list"></i></a>
+                    </li>
+                    <li id="nav-users" style="display: none;">
+                        <a href="users.html"><i class="fa-solid fa-user-shield"></i></a>
+                    </li>
+                </ul>
+            </nav>
+            <div class="logout" onclick="logout()">
+                <a href="#"><i class="fa-solid fa-right-from-bracket"></i></a>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Mobile Cart Toggle -->
+            <button class="mobile-cart-toggle" onclick="toggleCart()">
+                <i class="fa-solid fa-cart-shopping"></i>
+                <span id="cart-count-badge">0</span>
+            </button>
+
+            <!-- POS Section -->
+            <section id="pos-section" class="section active" style="display: block;">
+                <header>
+                    <div class="header-title">
+                        <h1>GrillMaster Resto</h1>
+                        <p id="current-date">Tuesday, 2 Feb 2021</p>
+                    </div>
+                    <div class="search-bar">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                        <input type="text" placeholder="Search for food, coffee, etc..." id="search-product">
+                    </div>
+                </header>
+
+                <div class="categories">
+                    <button class="category-btn active" onclick="filterProducts('all')">All Dishes</button>
+                    <button class="category-btn" onclick="filterProducts('Burger')">Burgers</button>
+                    <button class="category-btn" onclick="filterProducts('Fries')">Fries</button>
+                    <button class="category-btn" onclick="filterProducts('Drink')">Drinks</button>
+                </div>
+
+                <div class="product-grid" id="product-list"></div>
+            </section>
+        </main>
+
+        <!-- Right Sidebar (Cart) -->
+        <aside class="cart-sidebar">
+            <div class="cart-header">
+                <h2>Orders #<span id="order-id-display">34562</span></h2>
+                <div class="order-type-buttons">
+                    <button class="type-btn active">Dine In</button>
+                    <button class="type-btn">To Go</button>
+                    <button class="type-btn">Delivery</button>
+                </div>
+            </div>
+
+            <div class="cart-items-header">
+                <span>Item</span>
+                <span>Qty</span>
+                <span>Price</span>
+            </div>
+
+            <div class="cart-items" id="cart-items-container"></div>
+
+            <div class="cart-footer">
+                <div class="summary-row">
+                    <span>Discount (%)</span>
+                    <input type="number" id="cart-discount" value="0" min="0" max="100" style="width: 60px; background: #2d303e; border: 1px solid #393c49; color: #fff; padding: 5px; border-radius: 4px;" onchange="updateCartUI()">
+                </div>
+                <div class="summary-row total">
+                    <span>Sub total</span>
+                    <span id="cart-total">LKR 0.00</span>
+                </div>
+                <button class="btn-payment" onclick="placeOrder()">Continue to Payment</button>
+            </div>
+        </aside>
+    </div>
+
+    <!-- Checkout Customer Modal -->
+    <div id="checkout-modal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('checkout-modal')">&times;</span>
+            <h2>Customer Details</h2>
+            <form id="checkout-form">
+                <div class="form-group">
+                    <label>Name</label>
+                    <input type="text" id="checkout-name" required>
+                </div>
+                <div class="form-group">
+                    <label>Phone</label>
+                    <input type="text" id="checkout-phone" required>
+                </div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="checkout-email">
+                </div>
+                <div class="form-group">
+                    <label>Payment Method</label>
+                    <select id="checkout-payment" style="width: 100%; background: #2d303e; border: 1px solid #393c49; color: #fff; padding: 10px; border-radius: 8px; margin-top: 5px;">
+                        <option value="Cash">Cash</option>
+                        <option value="Card">Card</option>
+                        <option value="Online">Online</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn-primary" style="width: 100%;">Confirm Order</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

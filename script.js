@@ -27,6 +27,18 @@ let customers = [
     { id: 2, name: 'Nimali Silva', phone: '071-987-6543', email: 'nimali@gmail.com' }
 ];
 
+// List of users (Default Admin)
+let users = [
+    { 
+        id: 1, 
+        username: 'admin', 
+        password: '123', 
+        role: 'Admin', 
+        permissions: ['pos', 'customers', 'products', 'orders', 'home', 'users'] 
+    }
+];
+let currentUser = null;
+
 // List of past orders
 let orders = [
     { 
@@ -62,29 +74,78 @@ let currentOrderId = 34562;
 // 2. App Initialization
 // ==========================================
 
+function loadData() {
+    if(localStorage.getItem('pos_products')) {
+        products = JSON.parse(localStorage.getItem('pos_products'));
+    }
+    if(localStorage.getItem('pos_customers')) {
+        customers = JSON.parse(localStorage.getItem('pos_customers'));
+    }
+    if(localStorage.getItem('pos_orders')) {
+        orders = JSON.parse(localStorage.getItem('pos_orders'));
+    }
+    if(localStorage.getItem('pos_users')) {
+        users = JSON.parse(localStorage.getItem('pos_users'));
+    }
+    if(localStorage.getItem('pos_orderId')) {
+        currentOrderId = parseInt(localStorage.getItem('pos_orderId'));
+    }
+    if(localStorage.getItem('pos_currentUser')) {
+        currentUser = JSON.parse(localStorage.getItem('pos_currentUser'));
+    }
+}
+
+function saveData() {
+    localStorage.setItem('pos_products', JSON.stringify(products));
+    localStorage.setItem('pos_customers', JSON.stringify(customers));
+    localStorage.setItem('pos_orders', JSON.stringify(orders));
+    localStorage.setItem('pos_users', JSON.stringify(users));
+    localStorage.setItem('pos_orderId', currentOrderId.toString());
+    if(currentUser) {
+        localStorage.setItem('pos_currentUser', JSON.stringify(currentUser));
+    } else {
+        localStorage.removeItem('pos_currentUser');
+    }
+    
+    if(document.getElementById('stat-revenue')) updateDashboard();
+}
+
 // Runs when the page loads
 document.addEventListener('DOMContentLoaded', function() {
-    // Render initial data
-    renderProducts('all');
-    renderCustomers();
-    renderProductsTable();
-    renderOrders();
-    updateOrderId();
-    updateCurrentDate();
+    loadData();
     
-    // Setup form listeners
-    document.getElementById('customer-form').addEventListener('submit', handleCustomerSubmit);
-    document.getElementById('product-form').addEventListener('submit', handleProductSubmit);
-    document.getElementById('checkout-form').addEventListener('submit', handleCheckoutSubmit);
+    // Check login status
+    checkLogin();
+    
+    // Only run if we are logged in (or on login page)
+    
+    // Render initial data based on what page we are on
+    if(document.getElementById('product-list')) renderProducts('all');
+    if(document.getElementById('customer-table')) renderCustomers();
+    if(document.getElementById('product-table')) renderProductsTable();
+    if(document.getElementById('order-table')) renderOrders();
+    if(document.getElementById('user-table')) renderUsers();
+    if(document.getElementById('order-id-display')) updateOrderId();
+    if(document.getElementById('current-date')) updateCurrentDate();
+    if(document.getElementById('stat-revenue')) updateDashboard();
+    
+    // Setup form listeners if elements exist
+    if(document.getElementById('customer-form')) document.getElementById('customer-form').addEventListener('submit', handleCustomerSubmit);
+    if(document.getElementById('product-form')) document.getElementById('product-form').addEventListener('submit', handleProductSubmit);
+    if(document.getElementById('checkout-form')) document.getElementById('checkout-form').addEventListener('submit', handleCheckoutSubmit);
+    if(document.getElementById('login-form')) document.getElementById('login-form').addEventListener('submit', handleLogin);
+    if(document.getElementById('user-form')) document.getElementById('user-form').addEventListener('submit', handleUserSubmit);
     
     // Setup search listener
-    document.getElementById('search-product').addEventListener('input', handleSearch);
+    if(document.getElementById('search-product')) document.getElementById('search-product').addEventListener('input', handleSearch);
     
-    // Create overlay for mobile cart
-    let overlay = document.createElement('div');
-    overlay.className = 'cart-overlay';
-    overlay.onclick = toggleCart;
-    document.body.appendChild(overlay);
+    // Create overlay for mobile cart if cart sidebar exists
+    if(document.querySelector('.cart-sidebar')) {
+        let overlay = document.createElement('div');
+        overlay.className = 'cart-overlay';
+        overlay.onclick = toggleCart;
+        document.body.appendChild(overlay);
+    }
 });
 
 // ==========================================
@@ -105,34 +166,117 @@ function toggleCart() {
 }
 
 function updateCartBadge() {
+    let badge = document.getElementById('cart-count-badge');
+    if(!badge) return;
+    
     let count = 0;
     for (let i = 0; i < cart.length; i++) {
         count = count + cart[i].qty;
     }
-    document.getElementById('cart-count-badge').innerText = count;
+    badge.innerText = count;
 }
 
 function updateCurrentDate() {
     let dateElement = document.getElementById('current-date');
     let now = new Date();
-    dateElement.innerText = now.toDateString();
+    if(dateElement) dateElement.innerText = now.toDateString();
+    
+    let dashboardDate = document.getElementById('dashboard-date');
+    if(dashboardDate) dashboardDate.innerText = now.toDateString();
 }
 
-function showSection(sectionId) {
-    // Hide all sections
-    let sections = document.querySelectorAll('.section');
-    for (let i = 0; i < sections.length; i++) {
-        sections[i].classList.remove('active');
+function updateDashboard() {
+    let totalRevenue = 0;
+    for(let i=0; i<orders.length; i++) {
+        totalRevenue = totalRevenue + orders[i].total;
     }
     
-    // Show the selected section
-    document.getElementById(sectionId + '-section').classList.add('active');
+    if(document.getElementById('stat-revenue')) document.getElementById('stat-revenue').innerText = 'LKR ' + totalRevenue.toFixed(2);
+    if(document.getElementById('stat-orders')) document.getElementById('stat-orders').innerText = orders.length;
+    if(document.getElementById('stat-customers')) document.getElementById('stat-customers').innerText = customers.length;
+}
+
+// ==========================================
+// 3.1 Login & User Logic
+// ==========================================
+
+function checkLogin() {
+    let path = window.location.pathname;
+    let page = path.split("/").pop();
     
-    // Update sidebar active state
-    let navItems = document.querySelectorAll('.sidebar nav li');
-    for (let i = 0; i < navItems.length; i++) {
-        navItems[i].classList.remove('active');
+    // If we are on index.html (Login page)
+    if (page === 'index.html' || page === '') {
+        if (currentUser) {
+            window.location.href = 'dashboard.html';
+        }
+    } else {
+        // If we are on any other page
+        if (!currentUser) {
+            window.location.href = 'index.html';
+        } else {
+            updateNavigation();
+        }
     }
+}
+
+function handleLogin(e) {
+    e.preventDefault();
+    let u = document.getElementById('login-username').value;
+    let p = document.getElementById('login-password').value;
+    
+    let foundUser = null;
+    for(let i=0; i<users.length; i++) {
+        if(users[i].username === u && users[i].password === p) {
+            foundUser = users[i];
+            break;
+        }
+    }
+    
+    if(foundUser) {
+        currentUser = foundUser;
+        saveData(); // Save user to localStorage
+        window.location.href = 'dashboard.html';
+    } else {
+        alert('Invalid Username or Password');
+    }
+}
+
+function logout() {
+    currentUser = null;
+    saveData();
+    window.location.href = 'index.html';
+}
+
+function updateNavigation() {
+    if(!currentUser) return;
+    
+    let perms = currentUser.permissions;
+    
+    // Helper to show/hide nav items
+    function setNav(id, perm) {
+        let el = document.getElementById('nav-' + id);
+        if(!el) return;
+        
+        let hasPerm = false;
+        for(let i=0; i<perms.length; i++) {
+            if(perms[i] === perm) {
+                hasPerm = true;
+                break;
+            }
+        }
+        if(hasPerm) {
+            el.style.display = 'flex'; // or block/list-item depending on CSS
+        } else {
+            el.style.display = 'none';
+        }
+    }
+    
+    setNav('home', 'home');
+    setNav('pos', 'pos');
+    setNav('customers', 'customers');
+    setNav('products', 'products');
+    setNav('orders', 'orders');
+    setNav('users', 'users');
 }
 
 // ==========================================
@@ -155,6 +299,7 @@ function renderProducts(category) {
 
 function renderProductGrid(items) {
     let grid = document.getElementById('product-list');
+    if(!grid) return;
     grid.innerHTML = ''; 
     
     for (let i = 0; i < items.length; i++) {
@@ -218,6 +363,11 @@ function addToCart(productId) {
         }
     }
 
+    if (product.stock <= 0) {
+        alert("Out of Stock!");
+        return;
+    }
+
     let existingItem = null;
     for (let i = 0; i < cart.length; i++) {
         if (cart[i].id === productId) {
@@ -227,6 +377,10 @@ function addToCart(productId) {
     }
     
     if (existingItem) {
+        if (existingItem.qty >= product.stock) {
+            alert("Cannot add more. Stock limit reached!");
+            return;
+        }
         existingItem.qty = existingItem.qty + 1;
     } else {
         // Manual object creation
@@ -246,6 +400,8 @@ function addToCart(productId) {
 
 function updateCartUI() {
     let container = document.getElementById('cart-items-container');
+    if(!container) return;
+    
     container.innerHTML = '';
     let total = 0;
     
@@ -275,6 +431,19 @@ function updateCartUI() {
     }
     
     document.getElementById('cart-total').innerText = 'LKR ' + total.toFixed(2);
+    
+    // Calculate Discount
+    let discountInput = document.getElementById('cart-discount');
+    let discountPercent = 0;
+    if (discountInput) {
+        discountPercent = parseFloat(discountInput.value) || 0;
+    }
+    
+    let discountAmount = (total * discountPercent) / 100;
+    let finalTotal = total - discountAmount;
+    
+    document.getElementById('cart-total').innerText = 'LKR ' + finalTotal.toFixed(2);
+    
     updateCartBadge();
 }
 
@@ -288,6 +457,21 @@ function updateQty(productId, change) {
     }
     
     if (item) {
+        // Check stock if increasing
+        if (change > 0) {
+            let product = null;
+            for (let i = 0; i < products.length; i++) {
+                if (products[i].id === productId) {
+                    product = products[i];
+                    break;
+                }
+            }
+            if (item.qty >= product.stock) {
+                alert("Cannot add more. Stock limit reached!");
+                return;
+            }
+        }
+
         item.qty = item.qty + change;
         if (item.qty <= 0) {
             removeFromCart(productId);
@@ -322,6 +506,7 @@ function handleCheckoutSubmit(e) {
     let name = document.getElementById('checkout-name').value;
     let phone = document.getElementById('checkout-phone').value;
     let email = document.getElementById('checkout-email').value;
+    let paymentMethod = document.getElementById('checkout-payment').value;
     
     if (!name || name.trim() === "") {
         alert("Customer name is required.");
@@ -365,11 +550,18 @@ function handleCheckoutSubmit(e) {
         totalItems = totalItems + cart[i].qty;
     }
     
+    // Apply Discount
+    let discountPercent = parseFloat(document.getElementById('cart-discount').value) || 0;
+    let discountAmount = (total * discountPercent) / 100;
+    let finalTotal = total - discountAmount;
+    
     // Create new order object
     let newOrder = {
         id: currentOrderId,
         customer: name,
-        total: total,
+        total: finalTotal,
+        discount: discountAmount,
+        paymentMethod: paymentMethod,
         date: new Date().toISOString().split('T')[0],
         items: totalItems,
         orderItems: cart
@@ -396,11 +588,15 @@ function handleCheckoutSubmit(e) {
     
     // Reset cart
     cart = [];
+    document.getElementById('cart-discount').value = 0;
     updateCartUI();
     
     // Increment Order ID
     currentOrderId = currentOrderId + 1;
     updateOrderId();
+    
+    // Save Data
+    saveData();
     
     // Close modal
     closeModal('checkout-modal');
@@ -413,7 +609,8 @@ function handleCheckoutSubmit(e) {
 }
 
 function updateOrderId() {
-    document.getElementById('order-id-display').innerText = currentOrderId;
+    let el = document.getElementById('order-id-display');
+    if(el) el.innerText = currentOrderId;
 }
 
 // ==========================================
@@ -422,6 +619,7 @@ function updateOrderId() {
 
 function renderCustomers() {
     let tbody = document.querySelector('#customer-table tbody');
+    if(!tbody) return;
     tbody.innerHTML = '';
     
     for (let i = 0; i < customers.length; i++) {
@@ -494,6 +692,7 @@ function handleCustomerSubmit(e) {
         customers.push(newCustomer);
     }
     
+    saveData();
     renderCustomers();
     closeModal('customer-modal');
     e.target.reset();
@@ -510,6 +709,7 @@ function deleteCustomer(id) {
             }
         }
         customers = newCustomers;
+        saveData();
         renderCustomers();
     }
 }
@@ -520,6 +720,7 @@ function deleteCustomer(id) {
 
 function renderProductsTable() {
     let tbody = document.querySelector('#product-table tbody');
+    if(!tbody) return;
     tbody.innerHTML = '';
     
     for (let i = 0; i < products.length; i++) {
@@ -605,6 +806,7 @@ function handleProductSubmit(e) {
         products.push(newProduct);
     }
     
+    saveData();
     renderProductsTable();
     renderProducts('all');
     closeModal('product-modal');
@@ -622,6 +824,7 @@ function deleteProduct(id) {
             }
         }
         products = newProducts;
+        saveData();
         renderProductsTable();
         renderProducts('all');
     }
@@ -633,6 +836,7 @@ function deleteProduct(id) {
 
 function renderOrders() {
     let tbody = document.querySelector('#order-table tbody');
+    if(!tbody) return;
     tbody.innerHTML = '';
     
     for (let i = 0; i < orders.length; i++) {
@@ -644,7 +848,7 @@ function renderOrders() {
             <td>LKR ${o.total.toFixed(2)}</td>
             <td>${o.date}</td>
             <td>${o.items}</td>
-            <td><button class="btn-icon" onclick="viewOrder(${o.id})">View</button></td>
+            <td><button class="btn-view" onclick="viewOrder(${o.id})">View</button></td>
         `;
         tbody.appendChild(tr);
     }
@@ -721,8 +925,149 @@ function viewOrder(orderId) {
     openModal('order-modal');
 }
 
+function printOrder() {
+    let content = document.getElementById('order-details-content').innerHTML;
+    let printWindow = window.open('', '', 'height=600,width=800');
+    printWindow.document.write('<html><head><title>Print Receipt</title>');
+    printWindow.document.write('</head><body >');
+    printWindow.document.write(content);
+    printWindow.document.write('</body></html>');
+    printWindow.document.close();
+    printWindow.print();
+}
+
 // ==========================================
-// 9. Modal Logic
+// 9. User Management Logic
+// ==========================================
+
+function renderUsers() {
+    let tbody = document.querySelector('#user-table tbody');
+    if(!tbody) return;
+    tbody.innerHTML = '';
+    
+    for (let i = 0; i < users.length; i++) {
+        let u = users[i];
+        let tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td>${u.id}</td>
+            <td>${u.username}</td>
+            <td>${u.role}</td>
+            <td>${u.permissions.join(', ')}</td>
+            <td>
+                <button class="btn-icon" onclick="editUser(${u.id})"><i class="fa-solid fa-pen"></i></button>
+                <button class="btn-icon delete" onclick="deleteUser(${u.id})"><i class="fa-solid fa-trash"></i></button>
+            </td>
+        `;
+        tbody.appendChild(tr);
+    }
+}
+
+function openAddUserModal() {
+    document.getElementById('user-form').reset();
+    document.getElementById('user-id').value = '';
+    document.getElementById('user-modal-title').innerText = 'Add User';
+    openModal('user-modal');
+}
+
+function editUser(id) {
+    let user = null;
+    for (let i = 0; i < users.length; i++) {
+        if (users[i].id === id) {
+            user = users[i];
+            break;
+        }
+    }
+    
+    if (user) {
+        document.getElementById('user-id').value = user.id;
+        document.getElementById('user-username').value = user.username;
+        document.getElementById('user-password').value = user.password;
+        document.getElementById('user-role').value = user.role;
+        
+        // Set checkboxes
+        let checkboxes = document.querySelectorAll('input[name="permissions"]');
+        for(let i=0; i<checkboxes.length; i++) {
+            checkboxes[i].checked = false; // reset
+            for(let j=0; j<user.permissions.length; j++) {
+                if(checkboxes[i].value === user.permissions[j]) {
+                    checkboxes[i].checked = true;
+                }
+            }
+        }
+        
+        document.getElementById('user-modal-title').innerText = 'Edit User';
+        openModal('user-modal');
+    }
+}
+
+function handleUserSubmit(e) {
+    e.preventDefault();
+    let id = document.getElementById('user-id').value;
+    let username = document.getElementById('user-username').value;
+    let password = document.getElementById('user-password').value;
+    let role = document.getElementById('user-role').value;
+    
+    let permissions = [];
+    let checkboxes = document.querySelectorAll('input[name="permissions"]:checked');
+    for(let i=0; i<checkboxes.length; i++) {
+        permissions.push(checkboxes[i].value);
+    }
+    
+    if (id) {
+        // Update existing user
+        for (let i = 0; i < users.length; i++) {
+            if (users[i].id == id) {
+                users[i].username = username;
+                users[i].password = password;
+                users[i].role = role;
+                users[i].permissions = permissions;
+            }
+        }
+    } else {
+        // Add new user
+        let maxId = 0;
+        for (let i = 0; i < users.length; i++) {
+            if (users[i].id > maxId) {
+                maxId = users[i].id;
+            }
+        }
+        
+        let newUser = {
+            id: maxId + 1,
+            username: username,
+            password: password,
+            role: role,
+            permissions: permissions
+        };
+        users.push(newUser);
+    }
+    
+    saveData();
+    renderUsers();
+    closeModal('user-modal');
+    e.target.reset();
+}
+
+function deleteUser(id) {
+    if(id === 1) {
+        alert("Cannot delete default admin!");
+        return;
+    }
+    if(confirm('Are you sure you want to delete this user?')) {
+        let newUsers = [];
+        for (let i = 0; i < users.length; i++) {
+            if (users[i].id !== id) {
+                newUsers.push(users[i]);
+            }
+        }
+        users = newUsers;
+        saveData();
+        renderUsers();
+    }
+}
+
+// ==========================================
+// 10. Modal Logic
 // ==========================================
 
 function openAddCustomerModal() {

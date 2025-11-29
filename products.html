@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GrillMaster POS - Products</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="logo">
+                <i class="fa-solid fa-burger"></i>
+            </div>
+            <nav>
+                <ul>
+                    <li id="nav-home">
+                        <a href="dashboard.html"><i class="fa-solid fa-chart-pie"></i></a>
+                    </li>
+                    <li id="nav-pos">
+                        <a href="pos.html"><i class="fa-solid fa-house"></i></a>
+                    </li>
+                    <li id="nav-customers">
+                        <a href="customers.html"><i class="fa-solid fa-users"></i></a>
+                    </li>
+                    <li class="active" id="nav-products">
+                        <a href="products.html"><i class="fa-solid fa-box-open"></i></a>
+                    </li>
+                    <li id="nav-orders">
+                        <a href="orders.html"><i class="fa-solid fa-clipboard-list"></i></a>
+                    </li>
+                    <li id="nav-users" style="display: none;">
+                        <a href="users.html"><i class="fa-solid fa-user-shield"></i></a>
+                    </li>
+                </ul>
+            </nav>
+            <div class="logout" onclick="logout()">
+                <a href="#"><i class="fa-solid fa-right-from-bracket"></i></a>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Products Management Section -->
+            <section id="products-section" class="section active" style="display: block;">
+                <header>
+                    <h1>Product Management</h1>
+                    <button class="btn-primary" onclick="openAddProductModal()"><i class="fa-solid fa-plus"></i> Add Product</button>
+                </header>
+                <div class="table-container">
+                    <table id="product-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Image</th>
+                                <th>Name</th>
+                                <th>Category</th>
+                                <th>Price</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Product rows -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Product Modal -->
+    <div id="product-modal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('product-modal')">&times;</span>
+            <h2 id="product-modal-title">Add Product</h2>
+            <form id="product-form">
+                <input type="hidden" id="product-id">
+                <div class="form-group">
+                    <label>Name</label>
+                    <input type="text" id="product-name" required>
+                </div>
+                <div class="form-group">
+                    <label>Category</label>
+                    <select id="product-category" required>
+                        <option value="Burger">Burger</option>
+                        <option value="Fries">Fries</option>
+                        <option value="Drink">Drink</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Price</label>
+                    <input type="number" step="0.01" id="product-price" required>
+                </div>
+                <div class="form-group">
+                    <label>Stock Quantity</label>
+                    <input type="number" id="product-stock" required>
+                </div>
+                <div class="form-group">
+                    <label>Image URL</label>
+                    <input type="text" id="product-image" placeholder="https://example.com/image.png">
+                </div>
+                <button type="submit" class="btn-primary">Save</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
