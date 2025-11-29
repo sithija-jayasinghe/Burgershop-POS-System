@@ -194,6 +194,139 @@ function updateDashboard() {
     if(document.getElementById('stat-revenue')) document.getElementById('stat-revenue').innerText = 'LKR ' + totalRevenue.toFixed(2);
     if(document.getElementById('stat-orders')) document.getElementById('stat-orders').innerText = orders.length;
     if(document.getElementById('stat-customers')) document.getElementById('stat-customers').innerText = customers.length;
+
+    // Extended Dashboard Features
+    if(document.getElementById('recent-orders-table')) renderRecentOrders();
+    if(document.getElementById('top-products-list')) renderTopProducts();
+    if(document.getElementById('low-stock-list')) renderLowStock();
+}
+
+function renderRecentOrders() {
+    let tbody = document.getElementById('recent-orders-table');
+    if(!tbody) return;
+    tbody.innerHTML = '';
+
+    // Sort orders by ID descending (assuming higher ID = newer)
+    // Create a copy to avoid mutating original array
+    let sortedOrders = [...orders].sort((a, b) => b.id - a.id);
+    
+    // Take top 5
+    let recent = sortedOrders.slice(0, 5);
+
+    for(let i=0; i<recent.length; i++) {
+        let o = recent[i];
+        let tr = document.createElement('tr');
+        tr.style.borderBottom = '1px solid #393c49';
+        tr.innerHTML = `
+            <td style="padding: 12px 10px; color: #fff;">#${o.id}</td>
+            <td style="padding: 12px 10px; color: #abbbc2;">${o.customer}</td>
+            <td style="padding: 12px 10px; color: #fff;">LKR ${o.total.toFixed(2)}</td>
+        `;
+        tbody.appendChild(tr);
+    }
+}
+
+function renderTopProducts() {
+    let container = document.getElementById('top-products-list');
+    if(!container) return;
+    container.innerHTML = '';
+
+    // Calculate sales per product
+    let salesMap = {}; // { "Cheese Burger": 5, "Coke": 10 }
+    
+    for(let i=0; i<orders.length; i++) {
+        let o = orders[i];
+        if(o.orderItems) {
+            for(let j=0; j<o.orderItems.length; j++) {
+                let item = o.orderItems[j];
+                if(salesMap[item.name]) {
+                    salesMap[item.name] += item.qty;
+                } else {
+                    salesMap[item.name] = item.qty;
+                }
+            }
+        }
+    }
+
+    // Convert to array and sort
+    let salesArray = [];
+    for(let name in salesMap) {
+        salesArray.push({ name: name, qty: salesMap[name] });
+    }
+    salesArray.sort((a, b) => b.qty - a.qty);
+
+    // Take top 3
+    let top3 = salesArray.slice(0, 3);
+
+    for(let i=0; i<top3.length; i++) {
+        let item = top3[i];
+        // Find product image if possible
+        let img = 'https://via.placeholder.com/40';
+        for(let k=0; k<products.length; k++) {
+            if(products[k].name === item.name) {
+                img = products[k].image;
+                break;
+            }
+        }
+
+        let div = document.createElement('div');
+        div.style.display = 'flex';
+        div.style.alignItems = 'center';
+        div.style.gap = '15px';
+        div.innerHTML = `
+            <img src="${img}" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;">
+            <div style="flex: 1;">
+                <h4 style="margin: 0; font-size: 14px; color: #fff;">${item.name}</h4>
+                <p style="margin: 2px 0 0; font-size: 12px; color: #abbbc2;">${item.qty} Sold</p>
+            </div>
+        `;
+        container.appendChild(div);
+    }
+    
+    if(top3.length === 0) {
+        container.innerHTML = '<p style="color: #abbbc2; font-size: 14px;">No sales data yet.</p>';
+    }
+}
+
+function renderLowStock() {
+    let container = document.getElementById('low-stock-list');
+    if(!container) return;
+    container.innerHTML = '';
+
+    let lowStockItems = [];
+    for(let i=0; i<products.length; i++) {
+        if(products[i].stock < 15) { // Threshold 15
+            lowStockItems.push(products[i]);
+        }
+    }
+
+    // Sort by lowest stock first
+    lowStockItems.sort((a, b) => a.stock - b.stock);
+    
+    // Take top 5
+    let displayItems = lowStockItems.slice(0, 5);
+
+    for(let i=0; i<displayItems.length; i++) {
+        let p = displayItems[i];
+        let div = document.createElement('div');
+        div.style.display = 'flex';
+        div.style.justifyContent = 'space-between';
+        div.style.alignItems = 'center';
+        div.style.padding = '8px 0';
+        div.style.borderBottom = '1px solid #393c49';
+        
+        let color = p.stock === 0 ? '#ff7ca3' : '#ffb572'; // Red if 0, Orange if low
+        
+        div.innerHTML = `
+            <span style="color: #abbbc2; font-size: 14px;">${p.name}</span>
+            <span style="color: ${color}; font-weight: bold; font-size: 14px;">${p.stock} left</span>
+        `;
+        container.appendChild(div);
+    }
+
+    if(displayItems.length === 0) {
+        container.innerHTML = '<p style="color: #50d1aa; font-size: 14px;">All items are well stocked.</p>';
+    }
 }
 
 // ==========================================

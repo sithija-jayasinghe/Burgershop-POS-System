@@ -67,6 +67,48 @@
                         <p id="stat-customers" style="font-size: 24px; font-weight: bold; margin: 10px 0 0;">0</p>
                     </div>
                 </div>
+
+                <!-- Extended Dashboard Content -->
+                <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 20px; margin-top: 20px;">
+                    <!-- Recent Orders -->
+                    <div style="background: #1f1d2b; padding: 20px; border-radius: 8px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                            <h3 style="margin: 0; color: #fff; font-size: 18px;">Recent Orders</h3>
+                            <a href="orders.html" style="color: #ea7c69; text-decoration: none; font-size: 14px;">View All</a>
+                        </div>
+                        <table style="width: 100%; border-collapse: collapse;">
+                            <thead>
+                                <tr style="text-align: left; color: #abbbc2; border-bottom: 1px solid #393c49;">
+                                    <th style="padding: 10px;">ID</th>
+                                    <th style="padding: 10px;">Customer</th>
+                                    <th style="padding: 10px;">Amount</th>
+                                </tr>
+                            </thead>
+                            <tbody id="recent-orders-table">
+                                <!-- Populated by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Right Column -->
+                    <div style="display: flex; flex-direction: column; gap: 20px;">
+                        <!-- Top Selling -->
+                        <div style="background: #1f1d2b; padding: 20px; border-radius: 8px;">
+                            <h3 style="margin: 0 0 15px 0; color: #fff; font-size: 18px;">Top Selling Items</h3>
+                            <div id="top-products-list" style="display: flex; flex-direction: column; gap: 15px;">
+                                <!-- Populated by JS -->
+                            </div>
+                        </div>
+
+                        <!-- Low Stock -->
+                        <div style="background: #1f1d2b; padding: 20px; border-radius: 8px;">
+                            <h3 style="margin: 0 0 15px 0; color: #fff; font-size: 18px;">Low Stock Alert</h3>
+                            <div id="low-stock-list" style="display: flex; flex-direction: column; gap: 10px;">
+                                <!-- Populated by JS -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </section>
         </main>
     </div>
