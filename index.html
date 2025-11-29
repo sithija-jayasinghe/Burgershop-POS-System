@@ -165,7 +165,7 @@
                     <span>Sub total</span>
                     <span id="cart-total">LKR 0.00</span>
                 </div>
-                <button class="btn-payment" onclick="processPayment()">Continue to Payment</button>
+                <button class="btn-payment" onclick="placeOrder()">Continue to Payment</button>
             </div>
         </aside>
     </div>
@@ -239,6 +239,29 @@
             <div id="order-details-content">
                 <!-- Details will be populated by JS -->
             </div>
+        </div>
+    </div>
+
+    <!-- Checkout Customer Modal -->
+    <div id="checkout-modal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('checkout-modal')">&times;</span>
+            <h2>Customer Details</h2>
+            <form id="checkout-form">
+                <div class="form-group">
+                    <label>Name</label>
+                    <input type="text" id="checkout-name" required>
+                </div>
+                <div class="form-group">
+                    <label>Phone</label>
+                    <input type="text" id="checkout-phone" required>
+                </div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="checkout-email">
+                </div>
+                <button type="submit" class="btn-primary" style="width: 100%;">Confirm Order</button>
+            </form>
         </div>
     </div>
 

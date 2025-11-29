@@ -1,3 +1,8 @@
+// ==========================================
+// 1. Data Initialization
+// ==========================================
+
+// List of products available in the shop
 let products = [
     { id: 1, name: 'Cheese Burger', price: 1650, category: 'Burger', image: 'https://www.sargento.com/assets/Uploads/Recipe/Image/burgercampNachos_07__FocusFillWyIwLjAwIiwiMC4wMCIsODAwLDQ3OF0_CompressedW10.jpg', stock: 20 },
     { id: 2, name: 'SAustralian Burger', price: 1750, category: 'Burger', image: 'https://cdn.tasteatlas.com/images/dishes/d867d86275fe45b2af4a33c11d09b916.jpg?w=600', stock: 11 },
@@ -16,11 +21,13 @@ let products = [
     { id: 14, name: 'Passion Mojito', price: 250, category: 'Drink', image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSTrtrf_6SsG-r2Pts8_XQ7fAN5z-TW2Natmw&s', stock: 100 },
 ];
 
+// List of registered customers
 let customers = [
     { id: 1, name: 'Kasun Perera', phone: '077-123-4567', email: 'kasun@gmail.com' },
     { id: 2, name: 'Nimali Silva', phone: '071-987-6543', email: 'nimali@gmail.com' }
 ];
 
+// List of past orders
 let orders = [
     { 
         id: 34560, 
@@ -47,10 +54,17 @@ let orders = [
     }
 ];
 
+// Current shopping cart (empty at start)
 let cart = [];
 let currentOrderId = 34562;
 
-document.addEventListener('DOMContentLoaded', () => {
+// ==========================================
+// 2. App Initialization
+// ==========================================
+
+// Runs when the page loads
+document.addEventListener('DOMContentLoaded', function() {
+    // Render initial data
     renderProducts('all');
     renderCustomers();
     renderProductsTable();
@@ -58,186 +72,341 @@ document.addEventListener('DOMContentLoaded', () => {
     updateOrderId();
     updateCurrentDate();
     
+    // Setup form listeners
     document.getElementById('customer-form').addEventListener('submit', handleCustomerSubmit);
     document.getElementById('product-form').addEventListener('submit', handleProductSubmit);
+    document.getElementById('checkout-form').addEventListener('submit', handleCheckoutSubmit);
     
-    // Search Listener
+    // Setup search listener
     document.getElementById('search-product').addEventListener('input', handleSearch);
     
-    const overlay = document.createElement('div');
+    // Create overlay for mobile cart
+    let overlay = document.createElement('div');
     overlay.className = 'cart-overlay';
     overlay.onclick = toggleCart;
     document.body.appendChild(overlay);
 });
 
+// ==========================================
+// 3. Helper Functions
+// ==========================================
+
 function toggleCart() {
-    const cartSidebar = document.querySelector('.cart-sidebar');
-    const overlay = document.querySelector('.cart-overlay');
-    cartSidebar.classList.toggle('open');
-    overlay.classList.toggle('open');
+    let cartSidebar = document.querySelector('.cart-sidebar');
+    let overlay = document.querySelector('.cart-overlay');
+    
+    if (cartSidebar.classList.contains('open')) {
+        cartSidebar.classList.remove('open');
+        overlay.classList.remove('open');
+    } else {
+        cartSidebar.classList.add('open');
+        overlay.classList.add('open');
+    }
 }
 
 function updateCartBadge() {
-    const count = cart.reduce((sum, item) => sum + item.qty, 0);
+    let count = 0;
+    for (let i = 0; i < cart.length; i++) {
+        count = count + cart[i].qty;
+    }
     document.getElementById('cart-count-badge').innerText = count;
 }
 
 function updateCurrentDate() {
-    const dateElement = document.getElementById('current-date');
-    const now = new Date();
-    const options = { weekday: 'long', year: 'numeric', month: 'short', day: 'numeric' };
-    dateElement.innerText = now.toLocaleDateString('en-US', options);
+    let dateElement = document.getElementById('current-date');
+    let now = new Date();
+    dateElement.innerText = now.toDateString();
 }
 
 function showSection(sectionId) {
-    document.querySelectorAll('.section').forEach(sec => sec.classList.remove('active'));
-    document.getElementById(`${sectionId}-section`).classList.add('active');
+    // Hide all sections
+    let sections = document.querySelectorAll('.section');
+    for (let i = 0; i < sections.length; i++) {
+        sections[i].classList.remove('active');
+    }
     
-    document.querySelectorAll('.sidebar nav li').forEach(li => li.classList.remove('active'));
-    event.currentTarget.classList.add('active');
+    // Show the selected section
+    document.getElementById(sectionId + '-section').classList.add('active');
+    
+    // Update sidebar active state
+    let navItems = document.querySelectorAll('.sidebar nav li');
+    for (let i = 0; i < navItems.length; i++) {
+        navItems[i].classList.remove('active');
+    }
 }
 
+// ==========================================
+// 4. POS & Product Logic
+// ==========================================
+
 function renderProducts(category) {
-    const filtered = category === 'all' ? products : products.filter(p => p.category === category);
+    let filtered = [];
+    if (category === 'all') {
+        filtered = products;
+    } else {
+        for (let i = 0; i < products.length; i++) {
+            if (products[i].category === category) {
+                filtered.push(products[i]);
+            }
+        }
+    }
     renderProductGrid(filtered);
 }
 
 function renderProductGrid(items) {
-    const grid = document.getElementById('product-list');
-    grid.innerHTML = '';
+    let grid = document.getElementById('product-list');
+    grid.innerHTML = ''; 
     
-    items.forEach(product => {
-        const card = document.createElement('div');
+    for (let i = 0; i < items.length; i++) {
+        let product = items[i];
+        let card = document.createElement('div');
         card.className = 'product-card';
-        card.onclick = () => addToCart(product.id);
+        
         card.innerHTML = `
             <img src="${product.image}" alt="${product.name}">
             <h3>${product.name}</h3>
-            <div class="price">LKR ${product.price.toFixed(2)}</div>
+            <div class="price">LKR ${product.price}</div>
             <div class="stock">${product.stock} Available</div>
+            <button class="btn-view" style="width: 100%; margin-top: 10px;" onclick="addToCart(${product.id})">Add to Cart</button>
         `;
         grid.appendChild(card);
-    });
+    }
 }
 
 function handleSearch(e) {
-    const searchTerm = e.target.value.toLowerCase();
-    const filtered = products.filter(p => p.name.toLowerCase().includes(searchTerm));
+    let searchTerm = e.target.value.toLowerCase();
+    let filtered = [];
+    
+    for (let i = 0; i < products.length; i++) {
+        let productName = products[i].name.toLowerCase();
+        if (productName.includes(searchTerm)) {
+            filtered.push(products[i]);
+        }
+    }
+    
     renderProductGrid(filtered);
     
-    if (searchTerm) {
-        document.querySelectorAll('.category-btn').forEach(btn => btn.classList.remove('active'));
-    } else {
-        document.querySelector('.category-btn').classList.add('active');
-        renderProducts('all');
+    // Reset category buttons
+    let buttons = document.querySelectorAll('.category-btn');
+    for (let i = 0; i < buttons.length; i++) {
+        buttons[i].classList.remove('active');
     }
 }
 
 function filterProducts(category) {
-    document.querySelectorAll('.category-btn').forEach(btn => btn.classList.remove('active'));
+    // Update active button style
+    let buttons = document.querySelectorAll('.category-btn');
+    for (let i = 0; i < buttons.length; i++) {
+        buttons[i].classList.remove('active');
+    }
+    // Add active class to clicked button
     event.target.classList.add('active');
+    
     renderProducts(category);
 }
 
+// ==========================================
+// 5. Cart Logic
+// ==========================================
+
 function addToCart(productId) {
-    const product = products.find(p => p.id === productId);
-    const existingItem = cart.find(item => item.id === productId);
+    let product = null;
+    for (let i = 0; i < products.length; i++) {
+        if (products[i].id === productId) {
+            product = products[i];
+            break;
+        }
+    }
+
+    let existingItem = null;
+    for (let i = 0; i < cart.length; i++) {
+        if (cart[i].id === productId) {
+            existingItem = cart[i];
+            break;
+        }
+    }
     
     if (existingItem) {
-        existingItem.qty++;
+        existingItem.qty = existingItem.qty + 1;
     } else {
-        cart.push({ ...product, qty: 1 });
+        // Manual object creation
+        let newItem = {
+            id: product.id,
+            name: product.name,
+            price: product.price,
+            category: product.category,
+            image: product.image,
+            stock: product.stock,
+            qty: 1
+        };
+        cart.push(newItem);
     }
-    renderCart();
-    updateCartBadge();
+    updateCartUI();
 }
 
-function renderCart() {
-    const container = document.getElementById('cart-items-container');
+function updateCartUI() {
+    let container = document.getElementById('cart-items-container');
     container.innerHTML = '';
     let total = 0;
     
-    cart.forEach(item => {
-        const itemTotal = item.price * item.qty;
-        total += itemTotal;
+    for (let i = 0; i < cart.length; i++) {
+        let item = cart[i];
+        let itemTotal = item.price * item.qty;
+        total = total + itemTotal;
         
-        const el = document.createElement('div');
+        let el = document.createElement('div');
         el.className = 'cart-item';
         el.innerHTML = `
             <div class="cart-item-info">
                 <div class="cart-item-name">${item.name}</div>
-                <div class="cart-item-price">LKR ${item.price.toFixed(2)}</div>
+                <div class="cart-item-price">LKR ${item.price}</div>
             </div>
             <div class="cart-item-qty">
-                <button class="qty-btn" onclick="updateCartQty(${item.id}, -1)">-</button>
+                <button class="qty-btn" onclick="updateQty(${item.id}, -1)">-</button>
                 <span>${item.qty}</span>
-                <button class="qty-btn" onclick="updateCartQty(${item.id}, 1)">+</button>
+                <button class="qty-btn" onclick="updateQty(${item.id}, 1)">+</button>
             </div>
-            <div class="cart-item-total">LKR ${itemTotal.toFixed(2)}</div>
+            <div class="cart-item-total">LKR ${itemTotal}</div>
             <button class="cart-item-remove" onclick="removeFromCart(${item.id})">
                 <i class="fa-solid fa-trash"></i> Remove
             </button>
         `;
         container.appendChild(el);
-    });
+    }
     
-    document.getElementById('cart-total').innerText = `LKR ${total.toFixed(2)}`;
+    document.getElementById('cart-total').innerText = 'LKR ' + total.toFixed(2);
     updateCartBadge();
 }
 
-function updateCartQty(productId, change) {
-    const item = cart.find(i => i.id === productId);
+function updateQty(productId, change) {
+    let item = null;
+    for (let i = 0; i < cart.length; i++) {
+        if (cart[i].id === productId) {
+            item = cart[i];
+            break;
+        }
+    }
+    
     if (item) {
-        item.qty += change;
+        item.qty = item.qty + change;
         if (item.qty <= 0) {
             removeFromCart(productId);
         } else {
-            renderCart();
+            updateCartUI();
         }
     }
 }
 
 function removeFromCart(productId) {
-    cart = cart.filter(item => item.id !== productId);
-    renderCart();
+    let newCart = [];
+    for (let i = 0; i < cart.length; i++) {
+        if (cart[i].id !== productId) {
+            newCart.push(cart[i]);
+        }
+    }
+    cart = newCart;
+    updateCartUI();
 }
 
-function processPayment() {
+function placeOrder() {
     if (cart.length === 0) {
         alert('Cart is empty!');
         return;
     }
+    openModal('checkout-modal');
+}
+
+function handleCheckoutSubmit(e) {
+    e.preventDefault();
     
-    const total = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
-    const newOrder = {
+    let name = document.getElementById('checkout-name').value;
+    let phone = document.getElementById('checkout-phone').value;
+    let email = document.getElementById('checkout-email').value;
+    
+    if (!name || name.trim() === "") {
+        alert("Customer name is required.");
+        return;
+    }
+
+    // Check if customer exists
+    let customerExists = false;
+    for (let i = 0; i < customers.length; i++) {
+        if (customers[i].name.toLowerCase() === name.toLowerCase()) {
+            customerExists = true;
+            if (phone) customers[i].phone = phone;
+            if (email) customers[i].email = email;
+            break;
+        }
+    }
+    
+    if (!customerExists) {
+        let maxId = 0;
+        for (let i = 0; i < customers.length; i++) {
+            if (customers[i].id > maxId) {
+                maxId = customers[i].id;
+            }
+        }
+        
+        let newCustomer = {
+            id: maxId + 1,
+            name: name,
+            phone: phone || '-',
+            email: email || '-'
+        };
+        customers.push(newCustomer);
+    }
+    
+    renderCustomers(); // Update customer table
+    
+    let total = 0;
+    let totalItems = 0;
+    for (let i = 0; i < cart.length; i++) {
+        total = total + (cart[i].price * cart[i].qty);
+        totalItems = totalItems + cart[i].qty;
+    }
+    
+    // Create new order object
+    let newOrder = {
         id: currentOrderId,
-        customer: 'Walk-in Customer',
+        customer: name,
         total: total,
         date: new Date().toISOString().split('T')[0],
-        items: cart.reduce((sum, item) => sum + item.qty, 0),
-        orderItems: [...cart]
+        items: totalItems,
+        orderItems: cart
     };
     
     orders.push(newOrder);
     
-    cart.forEach(cartItem => {
-        const product = products.find(p => p.id === cartItem.id);
-        if (product) {
-            product.stock -= cartItem.qty;
+    // Update stock
+    for (let i = 0; i < cart.length; i++) {
+        let cartItem = cart[i];
+        for (let j = 0; j < products.length; j++) {
+            if (products[j].id === cartItem.id) {
+                products[j].stock = products[j].stock - cartItem.qty;
+            }
         }
-    });
+    }
     
+    // Refresh UI
     renderOrders();
     renderProducts('all');
     renderProductsTable();
     
-    alert(`Payment Successful! Order #${currentOrderId} placed.`);
+    alert('Payment Successful! Order #' + currentOrderId + ' placed for ' + name + '.');
+    
+    // Reset cart
     cart = [];
-    renderCart();
-    updateCartBadge();
-    currentOrderId++;
+    updateCartUI();
+    
+    // Increment Order ID
+    currentOrderId = currentOrderId + 1;
     updateOrderId();
     
+    // Close modal
+    closeModal('checkout-modal');
+    e.target.reset();
+    
+    // Close cart on mobile
     if (window.innerWidth <= 1024) {
         toggleCart();
     }
@@ -247,11 +416,17 @@ function updateOrderId() {
     document.getElementById('order-id-display').innerText = currentOrderId;
 }
 
+// ==========================================
+// 6. Customer Management
+// ==========================================
+
 function renderCustomers() {
-    const tbody = document.querySelector('#customer-table tbody');
+    let tbody = document.querySelector('#customer-table tbody');
     tbody.innerHTML = '';
-    customers.forEach(c => {
-        const tr = document.createElement('tr');
+    
+    for (let i = 0; i < customers.length; i++) {
+        let c = customers[i];
+        let tr = document.createElement('tr');
         tr.innerHTML = `
             <td>${c.id}</td>
             <td>${c.name}</td>
@@ -263,11 +438,18 @@ function renderCustomers() {
             </td>
         `;
         tbody.appendChild(tr);
-    });
+    }
 }
 
 function editCustomer(id) {
-    const customer = customers.find(c => c.id === id);
+    let customer = null;
+    for (let i = 0; i < customers.length; i++) {
+        if (customers[i].id === id) {
+            customer = customers[i];
+            break;
+        }
+    }
+    
     if (customer) {
         document.getElementById('customer-id').value = customer.id;
         document.getElementById('customer-name').value = customer.name;
@@ -280,22 +462,34 @@ function editCustomer(id) {
 
 function handleCustomerSubmit(e) {
     e.preventDefault();
-    const id = document.getElementById('customer-id').value;
-    const name = document.getElementById('customer-name').value;
-    const phone = document.getElementById('customer-phone').value;
-    const email = document.getElementById('customer-email').value;
+    let id = document.getElementById('customer-id').value;
+    let name = document.getElementById('customer-name').value;
+    let phone = document.getElementById('customer-phone').value;
+    let email = document.getElementById('customer-email').value;
     
     if (id) {
-        const index = customers.findIndex(c => c.id == id);
-        if (index !== -1) {
-            customers[index] = { id: parseInt(id), name, phone, email };
+        // Update existing customer
+        for (let i = 0; i < customers.length; i++) {
+            if (customers[i].id == id) {
+                customers[i].name = name;
+                customers[i].phone = phone;
+                customers[i].email = email;
+            }
         }
     } else {
-        const newCustomer = {
-            id: customers.length > 0 ? Math.max(...customers.map(c => c.id)) + 1 : 1,
-            name,
-            phone,
-            email
+        // Add new customer
+        let maxId = 0;
+        for (let i = 0; i < customers.length; i++) {
+            if (customers[i].id > maxId) {
+                maxId = customers[i].id;
+            }
+        }
+        
+        let newCustomer = {
+            id: maxId + 1,
+            name: name,
+            phone: phone,
+            email: email
         };
         customers.push(newCustomer);
     }
@@ -308,34 +502,53 @@ function handleCustomerSubmit(e) {
 }
 
 function deleteCustomer(id) {
-    if(confirm('Are you sure?')) {
-        customers = customers.filter(c => c.id !== id);
+    if(confirm('Are you sure you want to delete this customer?')) {
+        let newCustomers = [];
+        for (let i = 0; i < customers.length; i++) {
+            if (customers[i].id !== id) {
+                newCustomers.push(customers[i]);
+            }
+        }
+        customers = newCustomers;
         renderCustomers();
     }
 }
 
+// ==========================================
+// 7. Product Management
+// ==========================================
+
 function renderProductsTable() {
-    const tbody = document.querySelector('#product-table tbody');
+    let tbody = document.querySelector('#product-table tbody');
     tbody.innerHTML = '';
-    products.forEach(p => {
-        const tr = document.createElement('tr');
+    
+    for (let i = 0; i < products.length; i++) {
+        let p = products[i];
+        let tr = document.createElement('tr');
         tr.innerHTML = `
             <td>${p.id}</td>
             <td><img src="${p.image}" width="40" height="40" style="border-radius: 50%"></td>
             <td>${p.name}</td>
             <td>${p.category}</td>
-            <td>LKR ${p.price.toFixed(2)}</td>
+            <td>LKR ${p.price}</td>
             <td>
                 <button class="btn-icon" onclick="editProduct(${p.id})"><i class="fa-solid fa-pen"></i></button>
                 <button class="btn-icon delete" onclick="deleteProduct(${p.id})"><i class="fa-solid fa-trash"></i></button>
             </td>
         `;
         tbody.appendChild(tr);
-    });
+    }
 }
 
 function editProduct(id) {
-    const product = products.find(p => p.id === id);
+    let product = null;
+    for (let i = 0; i < products.length; i++) {
+        if (products[i].id === id) {
+            product = products[i];
+            break;
+        }
+    }
+    
     if (product) {
         document.getElementById('product-id').value = product.id;
         document.getElementById('product-name').value = product.name;
@@ -350,25 +563,43 @@ function editProduct(id) {
 
 function handleProductSubmit(e) {
     e.preventDefault();
-    const id = document.getElementById('product-id').value;
-    const name = document.getElementById('product-name').value;
-    const category = document.getElementById('product-category').value;
-    const price = parseFloat(document.getElementById('product-price').value);
-    const stock = parseInt(document.getElementById('product-stock').value);
-    const image = document.getElementById('product-image').value || 'https://via.placeholder.com/150';
+    let id = document.getElementById('product-id').value;
+    let name = document.getElementById('product-name').value;
+    let category = document.getElementById('product-category').value;
+    let price = parseFloat(document.getElementById('product-price').value);
+    let stock = parseInt(document.getElementById('product-stock').value);
+    let image = document.getElementById('product-image').value;
+    
+    if (image === '') {
+        image = 'https://via.placeholder.com/150';
+    }
     
     if (id) {
-        const index = products.findIndex(p => p.id == id);
-        if (index !== -1) {
-            products[index] = { ...products[index], name, category, price, stock, image };
+        // Update existing product
+        for (let i = 0; i < products.length; i++) {
+            if (products[i].id == id) {
+                products[i].name = name;
+                products[i].category = category;
+                products[i].price = price;
+                products[i].stock = stock;
+                products[i].image = image;
+            }
         }
     } else {
-        const newProduct = {
-            id: products.length > 0 ? Math.max(...products.map(p => p.id)) + 1 : 1,
-            name,
-            category,
-            price,
-            image,
+        // Add new product
+        let maxId = 0;
+        for (let i = 0; i < products.length; i++) {
+            if (products[i].id > maxId) {
+                maxId = products[i].id;
+            }
+        }
+        
+        let newProduct = {
+            id: maxId + 1,
+            name: name,
+            category: category,
+            price: price,
+            image: image,
             stock: stock
         };
         products.push(newProduct);
@@ -383,18 +614,30 @@ function handleProductSubmit(e) {
 }
 
 function deleteProduct(id) {
-    if(confirm('Are you sure?')) {
-        products = products.filter(p => p.id !== id);
+    if(confirm('Are you sure you want to delete this product?')) {
+        let newProducts = [];
+        for (let i = 0; i < products.length; i++) {
+            if (products[i].id !== id) {
+                newProducts.push(products[i]);
+            }
+        }
+        products = newProducts;
         renderProductsTable();
         renderProducts('all');
     }
 }
 
+// ==========================================
+// 8. Order History
+// ==========================================
+
 function renderOrders() {
-    const tbody = document.querySelector('#order-table tbody');
+    let tbody = document.querySelector('#order-table tbody');
     tbody.innerHTML = '';
-    orders.forEach(o => {
-        const tr = document.createElement('tr');
+    
+    for (let i = 0; i < orders.length; i++) {
+        let o = orders[i];
+        let tr = document.createElement('tr');
         tr.innerHTML = `
             <td>${o.id}</td>
             <td>${o.customer}</td>
@@ -404,17 +647,36 @@ function renderOrders() {
             <td><button class="btn-icon" onclick="viewOrder(${o.id})">View</button></td>
         `;
         tbody.appendChild(tr);
-    });
+    }
 }
 
 function viewOrder(orderId) {
-    const order = orders.find(o => o.id === orderId);
+    let order = null;
+    for (let i = 0; i < orders.length; i++) {
+        if (orders[i].id === orderId) {
+            order = orders[i];
+            break;
+        }
+    }
+    
     if (!order) return;
 
-    const content = document.getElementById('order-details-content');
+    let content = document.getElementById('order-details-content');
     let itemsHtml = '';
     
     if (order.orderItems && order.orderItems.length > 0) {
+        let rows = '';
+        for (let i = 0; i < order.orderItems.length; i++) {
+            let item = order.orderItems[i];
+            rows += `
+                <tr style="border-bottom:1px solid #393c49;">
+                    <td style="padding:8px;">${item.name}</td>
+                    <td style="padding:8px;">${item.qty}</td>
+                    <td style="padding:8px;">LKR ${(item.price * item.qty).toFixed(2)}</td>
+                </tr>
+            `;
+        }
+        
         itemsHtml = `
             <table style="width:100%; margin-top:15px; border-collapse: collapse;">
                 <thead>
@@ -425,13 +687,7 @@ function viewOrder(orderId) {
                     </tr>
                 </thead>
                 <tbody>
-                    ${order.orderItems.map(item => `
-                        <tr style="border-bottom:1px solid #393c49;">
-                            <td style="padding:8px;">${item.name}</td>
-                            <td style="padding:8px;">${item.qty}</td>
-                            <td style="padding:8px;">LKR ${(item.price * item.qty).toFixed(2)}</td>
-                        </tr>
-                    `).join('')}
+                    ${rows}
                 </tbody>
             </table>
         `;
@@ -464,6 +720,10 @@ function viewOrder(orderId) {
     
     openModal('order-modal');
 }
+
+// ==========================================
+// 9. Modal Logic
+// ==========================================
 
 function openAddCustomerModal() {
     document.getElementById('customer-form').reset();
