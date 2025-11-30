@@ -152,6 +152,17 @@ document.addEventListener('DOMContentLoaded', function() {
 // 3. Helper Functions
 // ==========================================
 
+function validateEmail(email) {
+    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return re.test(email);
+}
+
+function validatePhone(phone) {
+    // Allows digits, spaces, dashes, at least 9-10 chars
+    const re = /^[\d\s-]{9,}$/;
+    return re.test(phone);
+}
+
 function toggleCart() {
     let cartSidebar = document.querySelector('.cart-sidebar');
     let overlay = document.querySelector('.cart-overlay');
@@ -199,6 +210,36 @@ function updateDashboard() {
     if(document.getElementById('recent-orders-table')) renderRecentOrders();
     if(document.getElementById('top-products-list')) renderTopProducts();
     if(document.getElementById('low-stock-list')) renderLowStock();
+}
+
+function showNotification(message, type = 'success') {
+    let container = document.querySelector('.notification-container');
+    if (!container) {
+        container = document.createElement('div');
+        container.className = 'notification-container';
+        document.body.appendChild(container);
+    }
+
+    let icon = 'fa-check-circle';
+    if (type === 'error') icon = 'fa-circle-xmark';
+    if (type === 'warning') icon = 'fa-triangle-exclamation';
+
+    let notification = document.createElement('div');
+    notification.className = `notification ${type}`;
+    notification.innerHTML = `
+        <i class="fa-solid ${icon}"></i>
+        <span>${message}</span>
+    `;
+
+    container.appendChild(notification);
+
+    // Remove after 3 seconds
+    setTimeout(() => {
+        notification.style.animation = 'slideOut 0.3s ease forwards';
+        setTimeout(() => {
+            notification.remove();
+        }, 300);
+    }, 3000);
 }
 
 function renderRecentOrders() {
@@ -384,7 +425,7 @@ function checkLogin() {
         } else {
             // Check if user has permission for this page
             if (!hasPermissionForPage(currentUser, page)) {
-                alert("Access Denied: You do not have permission to view this page.");
+                showNotification("Access Denied: You do not have permission to view this page.", "error");
                 window.location.href = getFirstAllowedPage(currentUser);
             } else {
                 updateNavigation();
@@ -411,7 +452,7 @@ function handleLogin(e) {
         saveData(); // Save user to localStorage
         window.location.href = getFirstAllowedPage(currentUser);
     } else {
-        alert('Invalid Username or Password');
+        showNotification('Invalid Username or Password', "error");
     }
 }
 
@@ -538,7 +579,7 @@ function addToCart(productId) {
     }
 
     if (product.stock <= 0) {
-        alert("Out of Stock!");
+        showNotification("Out of Stock!", "error");
         return;
     }
 
@@ -552,7 +593,7 @@ function addToCart(productId) {
     
     if (existingItem) {
         if (existingItem.qty >= product.stock) {
-            alert("Cannot add more. Stock limit reached!");
+            showNotification("Cannot add more. Stock limit reached!", "warning");
             return;
         }
         existingItem.qty = existingItem.qty + 1;
@@ -641,7 +682,7 @@ function updateQty(productId, change) {
                 }
             }
             if (item.qty >= product.stock) {
-                alert("Cannot add more. Stock limit reached!");
+                showNotification("Cannot add more. Stock limit reached!", "warning");
                 return;
             }
         }
@@ -668,7 +709,7 @@ function removeFromCart(productId) {
 
 function placeOrder() {
     if (cart.length === 0) {
-        alert('Cart is empty!');
+        showNotification('Cart is empty!', "warning");
         return;
     }
     openModal('checkout-modal');
@@ -677,14 +718,40 @@ function placeOrder() {
 function handleCheckoutSubmit(e) {
     e.preventDefault();
     
-    let name = document.getElementById('checkout-name').value;
-    let phone = document.getElementById('checkout-phone').value;
-    let email = document.getElementById('checkout-email').value;
+    let name = document.getElementById('checkout-name').value.trim();
+    let phone = document.getElementById('checkout-phone').value.trim();
+    let email = document.getElementById('checkout-email').value.trim();
     let paymentMethod = document.getElementById('checkout-payment').value;
     
-    if (!name || name.trim() === "") {
-        alert("Customer name is required.");
+    if (!name || name === "") {
+        showNotification("Customer name is required.", "error");
         return;
+    }
+    if (!validatePhone(phone)) {
+        showNotification("Please enter a valid phone number.", "error");
+        return;
+    }
+    if (email && !validateEmail(email)) {
+        showNotification("Please enter a valid email address.", "error");
+        return;
+    }
+
+    // Check for duplicate phone/email across ALL customers before proceeding
+    for (let i = 0; i < customers.length; i++) {
+        // If the name matches, we are updating THIS customer, so it's fine if the phone matches THIS customer's old phone.
+        // But we must check if it matches SOMEONE ELSE's phone.
+        let isSameCustomer = customers[i].name.toLowerCase() === name.toLowerCase();
+        
+        if (!isSameCustomer) {
+            if (customers[i].phone === phone) {
+                showNotification(`Phone number already belongs to ${customers[i].name}.`, "error");
+                return;
+            }
+            if (email && customers[i].email === email) {
+                showNotification(`Email already belongs to ${customers[i].name}.`, "error");
+                return;
+            }
+        }
     }
 
     // Check if customer exists
@@ -758,7 +825,7 @@ function handleCheckoutSubmit(e) {
     renderProducts('all');
     renderProductsTable();
     
-    alert('Payment Successful! Order #' + currentOrderId + ' placed for ' + name + '.');
+    showNotification('Payment Successful! Order #' + currentOrderId + ' placed for ' + name + '.', "success");
     
     // Reset cart
     cart = [];
@@ -835,10 +902,39 @@ function editCustomer(id) {
 function handleCustomerSubmit(e) {
     e.preventDefault();
     let id = document.getElementById('customer-id').value;
-    let name = document.getElementById('customer-name').value;
-    let phone = document.getElementById('customer-phone').value;
-    let email = document.getElementById('customer-email').value;
+    let name = document.getElementById('customer-name').value.trim();
+    let phone = document.getElementById('customer-phone').value.trim();
+    let email = document.getElementById('customer-email').value.trim();
     
+    // Validations
+    if (name.length < 3) {
+        showNotification("Name must be at least 3 characters long.", "error");
+        return;
+    }
+    if (!validatePhone(phone)) {
+        showNotification("Please enter a valid phone number.", "error");
+        return;
+    }
+    if (email && !validateEmail(email)) {
+        showNotification("Please enter a valid email address.", "error");
+        return;
+    }
+
+    // Check for duplicates
+    for (let i = 0; i < customers.length; i++) {
+        // Skip if we are editing this same customer
+        if (id && customers[i].id == id) continue;
+
+        if (customers[i].phone === phone) {
+            showNotification("A customer with this phone number already exists.", "error");
+            return;
+        }
+        if (email && customers[i].email === email) {
+            showNotification("A customer with this email already exists.", "error");
+            return;
+        }
+    }
+
     if (id) {
         // Update existing customer
         for (let i = 0; i < customers.length; i++) {
@@ -939,12 +1035,36 @@ function editProduct(id) {
 function handleProductSubmit(e) {
     e.preventDefault();
     let id = document.getElementById('product-id').value;
-    let name = document.getElementById('product-name').value;
+    let name = document.getElementById('product-name').value.trim();
     let category = document.getElementById('product-category').value;
     let price = parseFloat(document.getElementById('product-price').value);
     let stock = parseInt(document.getElementById('product-stock').value);
-    let image = document.getElementById('product-image').value;
+    let image = document.getElementById('product-image').value.trim();
     
+    // Validations
+    if (name.length < 2) {
+        showNotification("Product name is too short.", "error");
+        return;
+    }
+    if (isNaN(price) || price <= 0) {
+        showNotification("Price must be a valid positive number.", "error");
+        return;
+    }
+    if (isNaN(stock) || stock < 0) {
+        showNotification("Stock cannot be negative.", "error");
+        return;
+    }
+
+    // Check for duplicate product name
+    for (let i = 0; i < products.length; i++) {
+        if (id && products[i].id == id) continue;
+        
+        if (products[i].name.toLowerCase() === name.toLowerCase()) {
+            showNotification("A product with this name already exists.", "error");
+            return;
+        }
+    }
+
     if (image === '') {
         image = 'https://via.placeholder.com/150';
     }
@@ -1177,10 +1297,30 @@ function editUser(id) {
 function handleUserSubmit(e) {
     e.preventDefault();
     let id = document.getElementById('user-id').value;
-    let username = document.getElementById('user-username').value;
+    let username = document.getElementById('user-username').value.trim();
     let password = document.getElementById('user-password').value;
     let role = document.getElementById('user-role').value;
     
+    // Validations
+    if (username.length < 3) {
+        showNotification("Username must be at least 3 characters.", "error");
+        return;
+    }
+    if (password.length < 3) {
+        showNotification("Password must be at least 3 characters.", "error");
+        return;
+    }
+
+    // Check for duplicate username
+    for (let i = 0; i < users.length; i++) {
+        if (id && users[i].id == id) continue;
+        
+        if (users[i].username.toLowerCase() === username.toLowerCase()) {
+            showNotification("Username already taken.", "error");
+            return;
+        }
+    }
+
     let permissions = [];
     let checkboxes = document.querySelectorAll('input[name="permissions"]:checked');
     for(let i=0; i<checkboxes.length; i++) {
@@ -1224,7 +1364,7 @@ function handleUserSubmit(e) {
 
 function deleteUser(id) {
     if(id === 1) {
-        alert("Cannot delete default admin!");
+        showNotification("Cannot delete default admin!", "error");
         return;
     }
     if(confirm('Are you sure you want to delete this user?')) {

@@ -569,6 +569,50 @@ th {
     border-radius: 3px;
 }
 
+/* Notification Toast */
+.notification-container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 2000;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.notification {
+    background-color: var(--panel-color);
+    color: var(--text-color);
+    padding: 16px 24px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 300px;
+    animation: slideIn 0.3s ease forwards;
+    border-left: 4px solid var(--accent-color);
+}
+
+.notification.success { border-left-color: var(--success-color); }
+.notification.error { border-left-color: var(--danger-color); }
+.notification.warning { border-left-color: var(--warning-color); }
+
+.notification i { font-size: 20px; }
+.notification.success i { color: var(--success-color); }
+.notification.error i { color: var(--danger-color); }
+.notification.warning i { color: var(--warning-color); }
+
+@keyframes slideIn {
+    from { transform: translateX(100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes slideOut {
+    from { transform: translateX(0); opacity: 1; }
+    to { transform: translateX(100%); opacity: 0; }
+}
+
 /* Mobile Cart Toggle Button (Default Hidden) */
 .mobile-cart-toggle {
     display: none;
@@ -651,7 +695,7 @@ th {
 }
 
 @media screen and (max-width: 768px) {
-    .container {
+    .container, .dashboard-page .container {
         display: flex;
         flex-direction: column-reverse;
         height: 100vh;
